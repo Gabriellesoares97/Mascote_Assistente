@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mascote Assistente 🦊🐾</title>
+<link rel="icon" id="dynamicFavicon" type="image/svg+xml" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lilac-1:#EFEAFB; --lilac-2:#C9B8F0; --lilac-3:#8B6FD9;
+    --cyan-1:#E3FBF9; --cyan-2:#8FE3DD; --cyan-3:#3FB8AE;
+    --fox:#FFB26B; --fox-dark:#F08A3C;
+    --white:#FFFFFF; --ink-soft:#8B7FA0; --paw-idle:#6B6080;
+    --focus-ring:#5B4B99;
+    /* Estas 3 variáveis são controladas pelo usuário na aba Configurações */
+    --bg:#EFEAFB; --accent:#C9B8F0; --ink:#4A4159;
+    --card:#FFFFFF; --accent2:var(--cyan-3);
+    --radius:22px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Nunito',sans-serif; background:var(--bg); color:var(--ink);
+    min-height:100vh; transition:background .5s ease; padding-bottom:90px;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+
+  /* Foco de teclado visível e consistente (a11y) */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--focus-ring); outline-offset:2px; border-radius:6px;
+  }
+
+  header{
+    padding:18px 16px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    position:sticky; top:0; z-index:20; background:var(--bg); border-bottom:2px solid rgba(139,111,217,0.15);
+  }
+  header h1{margin:0; font-size:1.25rem; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .header-actions{display:flex; gap:8px;}
+  .icon-btn{
+    background:var(--card); border:none; border-radius:14px; width:40px; height:40px;
+    font-size:1.1rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 3px 8px rgba(139,111,217,0.15); transition:transform .15s;
+  }
+  .icon-btn:active{transform:scale(0.9);}
+  .icon-btn[aria-pressed="true"]{background:var(--accent); color:var(--ink);}
+  #closeConfigBtn{background:var(--lilac-1); width:34px; height:34px; font-size:1rem;}
+  .mascot-bubble{
+    margin:0 16px 12px; background:var(--card); border-radius:18px; padding:12px 16px;
+    font-size:0.92rem; box-shadow:0 3px 10px rgba(139,111,217,0.12); display:flex; gap:10px; align-items:center;
+    animation:fadeIn .4s ease;
+  }
+  .mascot-bubble .emoji{font-size:1.5rem;}
+  #genderAccent{font-size:1rem; vertical-align:middle;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);}}
+
+  .three-paws{
+    margin:0 16px 14px; background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, var(--ink-soft)), color-mix(in srgb, var(--accent) 70%, var(--ink-soft))); border-radius:18px;
+    padding:12px 16px; display:flex; justify-content:space-around; gap:10px; color:var(--ink); box-shadow:0 4px 12px rgba(139,111,217,0.2);
+  }
+  /* Feminino: um pouco mais arredondado e com um leve brilho extra ("mais fofo") */
+  body.gender-fem{ --radius:26px; }
+  body.gender-fem .three-paws{ box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent); }
+  body.gender-fem .card{ border-radius:calc(var(--radius) + 2px); }
+  /* Masculino: cantos um pouco mais estruturados/retos */
+  body.gender-masc{ --radius:16px; }
+  body.gender-masc .mascot-bubble, body.gender-masc .three-paws{ border-radius:14px; }
+  .paw-item{text-align:center; font-size:0.78rem; font-weight:700;}
+  .paw-item .p{width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center; margin:0 auto 2px; color:var(--paw-idle); opacity:1; transition:.3s;}
+  .paw-item .p svg{width:100%; height:100%;}
+  .paw-item.done .p{color:var(--accent); filter:drop-shadow(0 3px 4px color-mix(in srgb, var(--accent) 60%, transparent)); opacity:1; transform-origin:center 85%; animation:pawWiggle 1.6s ease-in-out infinite;}
+  @keyframes pawWiggle{
+    0%, 100%{ transform:scale(1.2) rotate(-9deg); }
+    50%{ transform:scale(1.2) rotate(9deg); }
+  }
+
+  .tabs-wrap{
+    display:flex; align-items:center; gap:2px; position:sticky; top:70px; z-index:19; background:var(--bg); padding:2px 6px 10px;
+  }
+  .tabs-arrow{
+    flex:0 0 auto; border:none; background:var(--card); color:var(--ink-soft); width:24px; height:24px; border-radius:50%;
+    font-size:1rem; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  nav.tabs{
+    display:flex; overflow-x:auto; gap:6px; padding:2px 6px 4px; flex:1; min-width:0;
+    scroll-behavior:smooth; scroll-snap-type:x proximity;
+    scrollbar-width:thin; scrollbar-color:var(--accent) transparent;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            mask-image:linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+  nav.tabs::-webkit-scrollbar{height:6px;}
+  nav.tabs::-webkit-scrollbar-thumb{background:var(--accent); border-radius:10px;}
+  nav.tabs::-webkit-scrollbar-track{background:transparent;}
+  nav.tabs button{
+    flex:0 0 auto; border:none; background:var(--card); color:var(--ink-soft); padding:9px 14px; border-radius:14px;
+    font-weight:700; font-size:0.82rem; cursor:pointer; white-space:nowrap; font-family:'Nunito'; scroll-snap-align:start;
+  }
+  nav.tabs button.active{background:var(--accent); color:var(--ink);}
+
+  main{padding:4px 16px 20px;}
+  section.tab{display:none;}
+  section.tab.active{display:block; animation:fadeIn .3s ease;}
+
+  .card{
+    background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:14px;
+    box-shadow:0 4px 14px rgba(139,111,217,0.10); border:1px solid rgba(74,65,89,0.08);
+  }
+  .card h3{margin:0 0 10px; font-size:1.02rem; color:var(--ink);}
+  .day-col{margin-bottom:14px;}
+  .day-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .day-head .name{font-family:'Baloo 2'; font-weight:700; font-size:1rem;}
+  .energy-select{display:flex; gap:4px;}
+  .energy-select button{
+    border:none; border-radius:10px; padding:5px 8px; font-size:0.85rem; background:var(--lilac-1); cursor:pointer;
+  }
+  .energy-select button[aria-pressed="true"]{background:var(--fox); color:#fff;}
+  .limit-note{font-size:0.72rem; color:var(--ink-soft); margin-bottom:6px;}
+  .limit-note.full{color:var(--fox-dark); font-weight:700;}
+
+  .task-list{min-height:24px; border-radius:14px; transition:background .15s;}
+  .task-list.drag-over{background:rgba(143,227,221,0.35); outline:2px dashed var(--accent2);}
+  .task{
+    background:var(--lilac-1); border-radius:14px; padding:8px 10px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;
+    touch-action:none; cursor:grab;
+  }
+  .task.dragging{opacity:0.55; box-shadow:0 8px 18px rgba(0,0,0,0.18); z-index:60; cursor:grabbing;}
+  .task.done{opacity:0.55; text-decoration:line-through;}
+  .task-top{display:flex; align-items:center; gap:8px;}
+  .drag-handle{color:var(--ink-soft); font-size:1rem; cursor:grab; user-select:none;}
+  .task-top input[type=checkbox]{width:20px; height:20px; accent-color:var(--accent); touch-action:auto;}
+  .task-text{flex:1; font-size:0.9rem;}
+  .tag{font-size:0.65rem; background:var(--cyan-2); color:#1a4f4a; padding:2px 8px; border-radius:8px; font-weight:700;}
+  .task-actions{display:flex; gap:4px;}
+  .mini-btn{border:none; background:transparent; font-size:0.9rem; cursor:pointer; padding:2px 5px; touch-action:auto;}
+  .subtasks{padding-left:28px; display:flex; flex-direction:column; gap:3px;}
+  .subtasks label{font-size:0.78rem; display:flex; gap:6px; align-items:center;}
+  .add-task-row{display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;}
+  input[type=text], input[type=number], select, textarea{
+    font-family:'Nunito'; border:2px solid var(--lilac-2); border-radius:12px; padding:8px 10px; font-size:0.88rem; flex:1; min-width:0;
+  }
+  select{flex:0 0 auto;}
+  .btn{
+    border:none; border-radius:14px; padding:9px 14px; font-weight:800; cursor:pointer; font-family:'Baloo 2'; font-size:0.85rem;
+    background:var(--accent); color:var(--ink);
+  }
+  .btn.ghost{background:var(--card); border:2px solid var(--accent); color:var(--ink);}
+  .btn.small{padding:6px 10px; font-size:0.78rem;}
+  .btn[aria-pressed="true"].ghost{background:var(--accent); color:var(--ink);}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .exercise-types{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+  .ex-btn{border:none; background:var(--cyan-1); padding:10px 12px; border-radius:14px; font-weight:700; font-size:0.85rem; cursor:pointer;}
+  .ex-btn.today{background:var(--accent2); color:#fff;}
+  .streak-row{display:flex; gap:6px; margin-top:8px;}
+  .streak-row .p{width:1.6rem; height:1.6rem; display:inline-flex; color:var(--paw-idle); opacity:1; transition:.3s;}
+  .streak-row .p svg{width:100%; height:100%;}
+  .streak-row .p.on{opacity:1; color:var(--accent); filter:drop-shadow(0 2px 3px color-mix(in srgb, var(--accent) 55%, transparent)); transform-origin:center 85%; animation:pawWiggleSmall 1.5s ease-in-out infinite;}
+  @keyframes pawWiggleSmall{
+    0%, 100%{ transform:scale(1.08) rotate(-10deg); }
+    50%{ transform:scale(1.08) rotate(10deg); }
+  }
+  .day-paw-icon{display:inline-flex; width:1.15em; height:1.15em; vertical-align:-0.2em; color:var(--accent);}
+  .day-paw-icon svg{width:100%; height:100%;}
+
+  .bottle{
+    width:60px; height:130px; border:3px solid var(--cyan-3); border-radius:16px 16px 22px 22px; position:relative;
+    overflow:hidden; margin:0 auto; background:#fff;
+  }
+  .bottle .fill{position:absolute; bottom:0; left:0; right:0; background:linear-gradient(var(--cyan-2),var(--cyan-3)); transition:height .4s ease;}
+  .water-wrap{display:flex; align-items:center; gap:16px;}
+  .water-info{flex:1;}
+  .progress-bar{background:var(--lilac-1); border-radius:10px; height:10px; overflow:hidden; margin:6px 0;}
+  .progress-bar .fill{height:100%; background:var(--cyan-3);}
+
+  .breath-circle{
+    width:150px; height:150px; border-radius:50%; margin:20px auto; background:radial-gradient(circle,var(--cyan-2),var(--accent));
+    display:flex; align-items:center; justify-content:center; color:var(--ink); font-weight:800; font-family:'Baloo 2';
+    transition:transform 4s ease-in-out; transform:scale(1);
+  }
+  .breath-circle.in{transform:scale(1.35);}
+  .breath-circle.hold{transform:scale(1.35);}
+  .breath-circle.out{transform:scale(1);}
+  .guide-pick{display:flex; gap:10px; justify-content:center; margin-bottom:8px;}
+  .timer-pick{display:flex; gap:8px; justify-content:center; margin:10px 0;}
+  .timer-pick button{border:none; background:var(--lilac-1); border-radius:12px; padding:8px 14px; font-weight:700; cursor:pointer;}
+  .timer-pick button[aria-pressed="true"]{background:var(--accent); color:var(--ink);}
+  .calm-msg{text-align:center; font-size:0.85rem; color:var(--ink-soft); min-height:20px; margin-top:6px;}
+
+  .sound-grid{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .sound-btn{border:none; background:var(--cyan-1); padding:10px 12px; border-radius:14px; font-weight:700; font-size:0.82rem; cursor:pointer; flex:1; min-width:100px;}
+  .sound-btn[aria-pressed="true"]{background:var(--accent2); color:#fff;}
+  .sound-hint{font-size:0.72rem; color:var(--ink-soft); margin-top:6px;}
+
+  .idea-item, .ach-item{background:var(--lilac-1); border-radius:12px; padding:8px 10px; margin-bottom:6px; font-size:0.85rem; display:flex; justify-content:space-between; gap:6px;}
+  .weight-list{max-height:160px; overflow-y:auto; margin-top:8px;}
+  .chart-svg{width:100%; height:auto; display:block; margin-top:4px;}
+  .chart-empty{font-size:0.8rem; color:var(--ink-soft); text-align:center; padding:16px 0; margin:0;}
+  .weight-row{display:flex; justify-content:space-between; font-size:0.82rem; padding:4px 0; border-bottom:1px dashed var(--lilac-2);}
+
+  .summary-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;}
+  .stat-box{background:var(--lilac-1); border-radius:14px; padding:10px 6px; text-align:center;}
+  .stat-box .num{font-family:'Baloo 2'; font-size:1.4rem; color:var(--ink); display:block;}
+  .stat-box .lbl{font-size:0.68rem; color:var(--ink-soft);}
+  .summary-msg{font-size:0.85rem; color:var(--ink-soft);}
+
+  .microfocus-overlay{
+    position:fixed; inset:0; background:linear-gradient(160deg,var(--lilac-1),var(--cyan-1)); z-index:100;
+    display:none; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;
+  }
+  .microfocus-overlay.show{display:flex;}
+  .microfocus-overlay h2{font-size:1.4rem; color:var(--ink); margin-bottom:6px;}
+  .mf-timer{font-size:3rem; font-family:'Baloo 2'; color:var(--accent2); margin:16px 0;}
+
+  .confetti-piece{position:fixed; top:-20px; font-size:1.3rem; z-index:200; pointer-events:none; animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg); opacity:0.2;}}
+
+  .bottom-tools{
+    position:fixed; bottom:0; left:0; right:0; background:var(--card); display:flex; gap:8px; padding:10px 16px;
+    box-shadow:0 -4px 14px rgba(139,111,217,0.15); z-index:30;
+  }
+  .bottom-tools button{flex:1;}
+  ::-webkit-scrollbar{display:none;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(74,65,89,0.35); z-index:150; display:none;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--card); border-radius:20px; padding:20px; width:100%; max-width:360px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .modal-box h3{margin:0 0 10px; color:var(--ink); font-size:1rem;}
+  .modal-box input{width:100%; margin-bottom:12px;}
+  .modal-box .btn-row{justify-content:flex-end;}
+  .field-error{color:var(--fox-dark); font-size:0.78rem; margin:-6px 0 8px; display:none;}
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  .settings-group{margin-bottom:16px;}
+  .settings-label{font-size:0.82rem; font-weight:700; color:var(--ink); display:block; margin-bottom:8px;}
+  .swatch-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .swatch{
+    width:38px; height:38px; border-radius:50%; border:3px solid rgba(0,0,0,0.08); cursor:pointer; padding:0;
+    box-shadow:0 2px 6px rgba(0,0,0,0.12);
+  }
+  .swatch[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--ink);}
+  .mascot-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .mascot-btn{
+    border:3px solid transparent; background:var(--lilac-1); border-radius:16px; padding:10px 4px;
+    font-size:1.7rem; cursor:pointer; text-align:center;
+  }
+  .mascot-btn[aria-pressed="true"]{border-color:var(--ink); background:var(--card);}
+  .mascot-btn .name{display:block; font-size:0.62rem; font-family:'Nunito'; margin-top:4px; font-weight:700; color:var(--ink);}
+  .mascot-btn svg{width:1.7rem; height:1.7rem; vertical-align:-0.3rem;}
+
+  .cycle-badge{
+    margin:0 16px 12px; font-size:0.75rem; color:var(--ink-soft); display:flex; align-items:center; gap:6px;
+    padding:2px 4px;
+  }
+  .cycle-badge[hidden]{display:none;}
+  .symptom-btn{border:none; background:var(--cyan-1); padding:10px 8px; border-radius:14px; font-weight:700; font-size:0.78rem; cursor:pointer; flex:1; min-width:80px;}
+  .symptom-btn[aria-pressed="true"]{background:var(--accent2); color:#fff;}
+  .phase-pill{
+    display:inline-flex; align-items:center; gap:6px; background:var(--lilac-1); border-radius:14px; padding:8px 14px;
+    font-weight:700; font-family:'Baloo 2'; font-size:0.95rem; margin-bottom:8px;
+  }
+  .phase-day{font-size:0.75rem; color:var(--ink-soft); font-family:'Nunito'; font-weight:400;}
+  @media (max-width:370px){
+    .paw-item{font-size:0.7rem;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .paw-item.done .p, .streak-row .p.on{ animation:none; }
+  }
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<header>
+  <h1><span id="headerMascotEmoji" aria-hidden="true">🦊</span> Mascote Assistente <span id="genderAccent" aria-hidden="true"></span></h1>
+  <div class="header-actions">
+    <button class="icon-btn" id="themeBtn" title="Trocar tema" aria-label="Trocar tema de cores" aria-pressed="false">🌇</button>
+    <button class="icon-btn" id="soundBtn" title="Som ambiente" aria-label="Ligar ou desligar som ambiente" aria-pressed="false">🔇</button>
+    <button class="icon-btn" id="notifBtn" title="Ativar lembretes" aria-label="Ativar lembretes de água e tarefas pendentes" aria-pressed="false">🔕</button>
+  </div>
+</header>
+
+<div class="mascot-bubble" id="mascotBubble" role="status" aria-live="polite">
+  <span class="emoji">🦊</span>
+  <span id="mascotText">Oi! Vamos organizar seu dia com carinho, patinha por patinha 🐾</span>
+</div>
+
+<div class="cycle-badge" id="cyclePhaseBadge" hidden></div>
+
+<div class="three-paws" id="threePaws">
+  <div class="paw-item" id="paw-task"><span class="p" aria-hidden="true">🐾</span>Tarefa prioridade</div>
+  <div class="paw-item" id="paw-water"><span class="p" aria-hidden="true">🐾</span>Meta de água</div>
+  <div class="paw-item" id="paw-move"><span class="p" aria-hidden="true">🐾</span>Movimento/Calma</div>
+</div>
+
+<div class="tabs-wrap">
+  <button class="tabs-arrow" id="tabsScrollLeft" aria-label="Rolar categorias para a esquerda" tabindex="-1">‹</button>
+  <nav class="tabs" role="tablist" aria-label="Seções do aplicativo">
+    <button data-tab="config" role="tab" aria-selected="false">⚙️ <span data-i18n="nav.config">Config</span></button>
+    <button data-tab="semana" class="active" role="tab" aria-selected="true">🗓️ <span data-i18n="nav.week">Semana</span></button>
+    <button data-tab="movimento" role="tab" aria-selected="false"><span class="mascot-icon-slot">🦊</span>💪 <span data-i18n="nav.movement">Movimento</span></button>
+    <button data-tab="saude" role="tab" aria-selected="false">💧 <span data-i18n="nav.health">Saúde & Água</span></button>
+    <button data-tab="ciclo" role="tab" aria-selected="false">🌙 <span data-i18n="nav.cycle">Ciclo</span></button>
+    <button data-tab="calma" role="tab" aria-selected="false">🧘‍♀️ <span data-i18n="nav.calm">Calma</span></button>
+    <button data-tab="ideias" role="tab" aria-selected="false">💭 <span data-i18n="nav.ideas">Ideias & Conquistas</span></button>
+  </nav>
+  <button class="tabs-arrow" id="tabsScrollRight" aria-label="Rolar categorias para a direita" tabindex="-1">›</button>
+</div>
+
+<main>
+
+  <section class="tab" id="tab-config">
+    <div class="card" id="googleCard">
+      <h3>🔗 <span data-i18n="config.googleTitle">Conta Google</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="config.googleDesc">Conecte sua conta Google pra guardar uma cópia dos seus dados na nuvem e enviar suas tarefas pro Google Agenda automaticamente.</p>
+
+      <div id="googleSetupBlock">
+        <p style="font-size:0.78rem;color:var(--ink-soft);" data-i18n="config.googleNeedsId">Pra usar isso, você precisa criar um "Client ID" gratuito na sua própria conta Google (leva uns minutos). Cole ele aqui:</p>
+        <input type="text" id="googleClientIdInput" placeholder="Client ID (ex: 123456-abc.apps.googleusercontent.com)" style="width:100%; margin-bottom:8px;" aria-label="Client ID do Google">
+        <button class="btn ghost small" id="googleSaveIdBtn" data-i18n="config.googleSaveId">Salvar Client ID</button>
+        <p class="sound-hint" id="googleIdHint" data-i18n="config.googleIdHint">Ainda sem Client ID? Veja o passo a passo no README do projeto.</p>
+      </div>
+
+      <div id="googleConnectedBlock" style="display:none;">
+        <p style="font-weight:700;" id="googleStatusText"></p>
+        <div class="btn-row">
+          <button class="btn" id="googleSyncBtn">☁️ <span data-i18n="config.googleSyncNow">Sincronizar agora</span></button>
+          <button class="btn ghost" id="googleDisconnectBtn" data-i18n="config.googleDisconnect">Desconectar</button>
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.85rem;">
+          <input type="checkbox" id="googleAutoCalendarToggle">
+          <span data-i18n="config.googleAutoCalendar">Enviar novas tarefas pro Google Agenda automaticamente</span>
+        </label>
+      </div>
+
+      <div id="googleSignInBlock" style="display:none;">
+        <button class="btn" id="googleConnectBtn">🔗 <span data-i18n="config.googleConnect">Conectar com Google</span></button>
+      </div>
+
+      <p class="sound-hint" id="googleSyncMsg" role="status" aria-live="polite"></p>
+    </div>
+    <div class="card">
+      <h3><span data-i18n="config.languageTitle">Idioma</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="config.languageDesc">Escolha o idioma do aplicativo.</p>
+      <select id="localeSelect" aria-label="Idioma do aplicativo / Language / Idioma">
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="pt-PT">Português (Portugal)</option>
+        <option value="en-US">English (United States)</option>
+        <option value="es-ES">Español</option>
+      </select>
+    </div>
+    <div class="card">
+      <h3><span data-i18n="config.genderTitle">Gênero</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="config.genderDesc">Isso ajusta o visual do app e se a aba de Ciclo aparece. Você pode mudar quando quiser.</p>
+      <div class="mascot-grid" id="genderGrid" role="group" aria-label="Escolha de gênero" style="grid-template-columns:repeat(3,1fr);"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <h3 style="margin:0;"><span data-i18n="config.colorsTitle">Cores do aplicativo</span></h3>
+        <button class="icon-btn" id="closeConfigBtn" aria-label="Fechar configurações">✕</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="config.colorsDesc">Fundo e botões ficam em tons claros; as letras podem ser escuras, para manter tudo confortável de ler.</p>
+      <div class="settings-group">
+        <span class="settings-label" data-i18n="config.bgLabel">Fundo</span>
+        <div class="swatch-row" id="bgSwatches" role="group" aria-label="Cor de fundo"></div>
+      </div>
+      <div class="settings-group">
+        <span class="settings-label" data-i18n="config.btnLabel">Botões</span>
+        <div class="swatch-row" id="btnSwatches" role="group" aria-label="Cor dos botões"></div>
+      </div>
+      <div class="settings-group">
+        <span class="settings-label" data-i18n="config.textLabel">Letras</span>
+        <div class="swatch-row" id="textSwatches" role="group" aria-label="Cor das letras"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost small" id="resetColorsBtn">↩️ <span data-i18n="config.resetBtn">Restaurar cores padrão</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🐾 <span data-i18n="config.mascotTitle">Escolha seu mascote</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="config.mascotDesc">Ele aparece no topo do app e nas suas mensagens de apoio.</p>
+      <div class="mascot-grid" id="mascotGrid" role="group" aria-label="Escolha do mascote"></div>
+      <div style="margin-top:12px;">
+        <label class="settings-label" for="mascotNameInput" data-i18n="config.mascotNameLabel">Nome do mascote</label>
+        <input type="text" id="mascotNameInput" maxlength="20" aria-label="Nome do mascote">
+      </div>
+    </div>
+  </section>
+
+  <section class="tab active" id="tab-semana">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <h3 style="margin:0;" data-i18n="week.title">Sua semana, sem sobrecarga</h3>
+        <div class="btn-row" style="margin:0;">
+          <button class="btn ghost small" id="viewToggleBtn" aria-label="Alternar entre ver só hoje ou a semana toda" aria-pressed="false">👀 Só hoje</button>
+          <button class="btn ghost small" id="archiveBtn" aria-label="Limpar tarefas concluídas da semana">🧹 <span data-i18n="week.archiveBtn">Limpar concluídas</span></button>
+          <button class="btn ghost small" id="icsExportBtn" aria-label="Exportar tarefas pendentes como arquivo de agenda">📅 <span data-i18n="week.icsBtn">Exportar .ics</span></button>
+        </div>
+      </div>
+      <p class="sound-hint" data-i18n="week.dragHint">Dica: segure e arraste um card de tarefa para movê-lo para outro dia, ou use os botões ⬅️➡️.</p>
+      <div id="weekContainer"></div>
+    </div>
+    <div class="card">
+      <h3>📦 <span data-i18n="week.warehouseTitle">Armazém de Ideias</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="week.warehouseDesc">Ideias que valem a pena guardar de verdade — sem pressa para usar.</p>
+      <div class="add-task-row">
+        <input type="text" id="warehouseQuickInput" placeholder="Uma ideia para guardar..." aria-label="Nova ideia para o armazém">
+        <button class="btn small" id="warehouseQuickAdd" data-i18n="week.guardarBtn">Guardar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💭 <span data-i18n="week.ideasTitle">Lixeira das Ideias (Dump Mental)</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="week.ideasDesc">Jogue aqui pensamentos soltos que não precisam entrar na semana agora.</p>
+      <div class="add-task-row">
+        <input type="text" id="ideaQuickInput" placeholder="Solte um pensamento..." aria-label="Novo pensamento para a lixeira de ideias">
+        <button class="btn small" id="ideaQuickAdd" data-i18n="week.guardarBtn">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-movimento">
+    <div class="card">
+      <h3><span class="mascot-icon-slot">🦊</span>💪 <span data-i18n="movement.title">Patinhas em Movimento</span></h3>
+      <p style="font-size:0.85rem;color:var(--ink-soft);margin-top:0;" data-i18n="movement.desc">Qualquer movimento conta! 15 minutos já é uma grande vitória 🌸</p>
+      <div class="exercise-types" id="exerciseTypes"></div>
+      <div class="streak-row" id="streakRow" aria-label="Dias com movimento nesta semana"></div>
+      <p style="font-size:0.78rem;color:var(--ink-soft);" data-i18n="movement.streakLabel">Dias com movimento nesta semana</p>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-saude">
+    <div class="card">
+      <h3><span class="mascot-icon-slot">🦊</span>💧 <span data-i18n="health.waterTitle">Calculadora de Hidratação</span></h3>
+      <div class="grid-2">
+        <input type="number" id="inPeso" placeholder="Peso (kg)" aria-label="Peso em quilos">
+        <input type="number" id="inAltura" placeholder="Altura (cm)" aria-label="Altura em centímetros">
+      </div>
+      <div class="grid-2" style="margin-top:8px;">
+        <input type="number" id="inIdade" placeholder="Idade" aria-label="Idade">
+        <button class="btn ghost" id="calcBtn" data-i18n="health.calcBtn">Calcular meta</button>
+      </div>
+      <div class="water-wrap" style="margin-top:16px;">
+        <div class="bottle" role="img" aria-label="Garrafinha mostrando o progresso de água do dia"><div class="fill" id="bottleFill" style="height:0%"></div></div>
+        <div class="water-info">
+          <div id="waterGoalText">Defina seus dados para calcular a meta 🌸</div>
+          <div class="progress-bar"><div class="fill" id="waterProgressBar" style="width:0%"></div></div>
+          <div class="btn-row">
+            <button class="btn small" id="add250" aria-label="Adicionar 250 mililitros de água">+250ml</button>
+            <button class="btn small ghost" id="add500" aria-label="Adicionar 500 mililitros de água">+500ml</button>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost small" id="snackReminderBtn">🍎 <span data-i18n="health.snackBtn">Lembrete de lanche</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 data-i18n="health.weightTitle">Peso & IMC — acolhedor, sem julgamento</h3>
+      <div class="btn-row">
+        <button class="btn small" id="logWeightBtn" data-i18n="health.logWeightBtn">Registrar peso de hoje</button>
+      </div>
+      <div id="bmiResult" style="margin-top:10px; font-size:0.88rem;" aria-live="polite"></div>
+      <div class="weight-list" id="weightList"></div>
+    </div>
+    <div class="card">
+      <h3>📈 <span data-i18n="charts.title">Histórico dos últimos meses</span></h3>
+      <p class="settings-label" data-i18n="charts.waterLabel">Água (ml/dia)</p>
+      <div id="waterChartContainer"></div>
+      <p class="settings-label" style="margin-top:14px;" data-i18n="charts.weightLabel">Peso (kg)</p>
+      <div id="weightChartContainer"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-ciclo">
+    <div class="card">
+      <h3>🌙 <span data-i18n="cycle.configTitle">Meu Ciclo</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="cycle.configDesc">Essas informações ajudam o app a ajustar suas metas com mais gentileza.</p>
+      <div class="grid-2">
+        <div>
+          <span class="settings-label" data-i18n="cycle.lastPeriodLabel">Início da última menstruação</span>
+          <input type="date" id="cycleLastPeriod" aria-label="Data de início da última menstruação">
+        </div>
+        <div>
+          <span class="settings-label" data-i18n="cycle.periodLenLabel">Duração da menstruação (dias)</span>
+          <input type="number" id="cyclePeriodLen" min="1" max="10" aria-label="Duração da menstruação em dias">
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <span class="settings-label" data-i18n="cycle.cycleLenLabel">Duração do ciclo (dias)</span>
+        <input type="number" id="cycleLen" min="20" max="45" aria-label="Duração do ciclo em dias">
+      </div>
+      <div class="btn-row">
+        <button class="btn small" id="cycleSaveBtn" data-i18n="cycle.saveBtn">Salvar dados do ciclo</button>
+      </div>
+    </div>
+    <div class="card" id="cyclePhaseCard" style="display:none;">
+      <h3 data-i18n="cycle.phaseTitle">Fase atual</h3>
+      <div id="cyclePhaseDisplay"></div>
+    </div>
+    <div class="card" id="cycleSymptomsCard" style="display:none;">
+      <h3 data-i18n="cycle.symptomsTitle">Sintomas de hoje</h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="cycle.symptomsDesc">Toque para marcar o que você está sentindo hoje.</p>
+      <div class="sound-grid" id="symptomButtons" role="group" aria-label="Sintomas de hoje"></div>
+    </div>
+    <div class="card" id="cycleChartCard" style="display:none;">
+      <h3>📈 <span data-i18n="charts.cycleLabel">Duração dos últimos ciclos</span></h3>
+      <div id="cycleChartContainer"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-calma">
+    <div class="card">
+      <h3 data-i18n="calm.title">Cantinho da Calma 🧘‍♀️</h3>
+      <div class="guide-pick" role="group" aria-label="Guia da respiração">
+        <span class="mascot-icon-slot" style="font-size:1.6rem; padding:10px 16px; background:var(--lilac-1); border-radius:16px; display:inline-block;" aria-hidden="true">🦊</span>
+      </div>
+      <div class="timer-pick" role="group" aria-label="Duração da pausa de respiração">
+        <button data-min="1" aria-pressed="false" aria-label="Timer de 1 minuto">1 min</button>
+        <button data-min="3" aria-pressed="true" aria-label="Timer de 3 minutos">3 min</button>
+        <button data-min="5" aria-pressed="false" aria-label="Timer de 5 minutos">5 min</button>
+      </div>
+      <div class="breath-circle" id="breathCircle" aria-live="polite">Inspire</div>
+      <div class="calm-msg" id="calmMsg">Toque em começar quando estiver pronta(o) 🌸</div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" id="calmStartBtn" data-i18n="calm.startBtn">Começar</button>
+        <button class="btn ghost" id="calmStopBtn" style="display:none;" data-i18n="calm.stopBtn">Parar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎧 <span data-i18n="calm.soundsTitle">Sons para focar ou relaxar</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="calm.soundsDesc">Sons gerados na hora, sem precisar de internet.</p>
+      <div class="sound-grid" role="group" aria-label="Escolha do som ambiente">
+        <button class="sound-btn" data-sound="marrom" aria-pressed="false" aria-label="Tocar ondas do mar suaves"><span data-i18n="calm.soundWaves">🌊 Ondas do Mar</span></button>
+        <button class="sound-btn" data-sound="rosa" aria-pressed="false" aria-label="Tocar brisa suave"><span data-i18n="calm.soundBreeze">🍃 Brisa Suave</span></button>
+        <button class="sound-btn" data-sound="binaural" aria-pressed="false" aria-label="Tocar tom binaural leve"><span data-i18n="calm.soundBinaural">🎵 Tom Binaural</span></button>
+        <button class="sound-btn" data-sound="suave" aria-pressed="false" aria-label="Tocar toque suave para relaxar"><span data-i18n="calm.soundSoft">🌙 Toque Suave</span></button>
+      </div>
+      <p class="sound-hint" data-i18n="calm.soundHint">O tom binaural funciona melhor com fones de ouvido 🎧</p>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-ideias">
+    <div class="card">
+      <h3>📦 <span data-i18n="week.warehouseTitle">Armazém de Ideias</span></h3>
+      <div id="warehouseList"></div>
+    </div>
+    <div class="card">
+      <h3>💭 <span data-i18n="ideas.ideasTitle">Ideias soltas</span></h3>
+      <div id="ideaList"></div>
+    </div>
+    <div class="card" id="summaryCard">
+      <h3>📊 <span data-i18n="ideas.summaryTitle">Resumo da semana</span></h3>
+      <div id="summaryContent"></div>
+    </div>
+    <div class="card">
+      <h3>🏆 <span data-i18n="ideas.muralTitle">Mural das Conquistas</span></h3>
+      <div id="achList"></div>
+    </div>
+    <div class="card">
+      <h3>💾 <span data-i18n="ideas.backupTitle">Backup</span></h3>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:0;" data-i18n="ideas.backupDesc">Guarde uma cópia dos seus dados ou restaure de um backup anterior.</p>
+      <div class="btn-row">
+        <button class="btn ghost small" id="backupExportBtn" aria-label="Exportar backup dos dados">⬇️ <span data-i18n="ideas.exportBtn">Exportar backup</span></button>
+        <button class="btn ghost small" id="backupImportBtn" aria-label="Importar backup dos dados">⬆️ <span data-i18n="ideas.importBtn">Importar backup</span></button>
+        <input type="file" id="backupFileInput" accept="application/json" style="display:none;" aria-hidden="true">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="bottom-tools">
+  <button class="btn ghost" id="helpChooseBtn"><span class="mascot-icon-slot">🦊</span> <span data-i18n="common.helpChoose">Me ajude a escolher</span></button>
+  <button class="btn" id="microFocusBtn">🎯 <span data-i18n="common.focusNow">Focar agora</span></button>
+</div>
+
+<div class="microfocus-overlay" id="microFocusOverlay" role="dialog" aria-modal="true" aria-label="Modo Micro-Foco">
+  <div class="mascot-icon-slot" style="font-size:2.5rem;" aria-hidden="true">🦊</div>
+  <h2>Modo Micro-Foco</h2>
+  <div id="mfTaskText" style="font-size:1.05rem; font-weight:700;">—</div>
+  <div class="mf-timer" id="mfTimer" aria-live="polite">15:00</div>
+  <div class="btn-row">
+    <button class="btn" id="mfDoneBtn"><span data-i18n="common.mfDone">Concluí!</span> 🎉</button>
+    <button class="btn ghost" id="mfCancelBtn" data-i18n="common.mfExit">Sair</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3 id="modalTitle">Título</h3>
+    <label class="sr-only" for="modalInput" id="modalInputLabel">Valor</label>
+    <input type="text" id="modalInput" inputmode="decimal" aria-labelledby="modalTitle">
+    <div class="field-error" id="modalError" role="alert">Por favor, preencha este campo.</div>
+    <div class="btn-row">
+      <button class="btn ghost small" id="modalCancel" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn small" id="modalConfirm" data-i18n="common.save">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS = [
+  {key:'seg', name:'Segunda'}, {key:'ter', name:'Terça'}, {key:'qua', name:'Quarta'},
+  {key:'qui', name:'Quinta'}, {key:'sex', name:'Sexta'}, {key:'sab', name:'Sábado'}, {key:'dom', name:'Domingo'}
+];
+const TAGS = ['Aulas','Trabalho','Saúde','Casa','Pessoal'];
+const EX_TYPES = ['Caminhada','Musculação','Pilates','Corrida','Alongamento','Dança','Outro'];
+const STORAGE_KEY = 'foco-patinhas:state';
+
+// Paletas para a aba de Configurações: fundo/botões sempre claros, letras sempre escuras.
+const LIGHT_SWATCHES = [
+  {name:'Lilás', value:'#EFEAFB'}, {name:'Pêssego', value:'#FFF1E6'}, {name:'Menta', value:'#E3FBF9'},
+  {name:'Rosa', value:'#FFE9F0'}, {name:'Manteiga', value:'#FFF8DE'}, {name:'Céu', value:'#E8F2FF'},
+  {name:'Branco', value:'#FFFFFF'}, {name:'Cinza claro', value:'#F0F0F3'}
+];
+const DARK_TEXT_SWATCHES = [
+  {name:'Ameixa', value:'#4A4159'}, {name:'Verde-escuro', value:'#2E4B3E'}, {name:'Azul-marinho', value:'#233A5E'},
+  {name:'Marrom', value:'#4E342E'}, {name:'Grafite', value:'#2B2B2B'}, {name:'Vinho', value:'#5C2A3A'}
+];
+const MASCOTS = [
+  {key:'raposa', emoji:'🦊', name:'Raposa'}, {key:'gato', emoji:'🐱', name:'Gato'},
+  {key:'cachorro', emoji:'🐶', name:'Cachorro'}, {key:'coelho', emoji:'🐰', name:'Coelho'},
+  {key:'panda', emoji:'🐼', name:'Panda'}, {key:'coruja', emoji:'🦉', name:'Coruja'},
+  {key:'urso', emoji:'🐻', name:'Urso'}, {key:'coala', emoji:'🐨', name:'Coala'},
+  {key:'dragao', emoji:'🐉', name:'Dragão'}, {key:'dino', emoji:'🦕', name:'Dinossauro'},
+  {key:'leao', emoji:'🦁', name:'Leão'}, {key:'tigre', emoji:'🐯', name:'Tigre'},
+  {key:'pinguim', emoji:'🐧', name:'Pinguim'}
+];
+const PRESET_LILAC = {bg:'#EFEAFB', btn:'#C9B8F0'};
+const PRESET_PEACH = {bg:'#FFF1E6', btn:'#F5C9A0'};
+// Preset alternativo de cor (tons frios e mais arrojados), continua claro no fundo/botão
+// para manter a mesma regra de contraste já usada no resto do app.
+const PRESET_BOLD = {bg:'#E7EEF4', btn:'#9FC3DE'};
+// Preset "fofo" (rosa suave), aplicado quando a pessoa escolhe o gênero feminino.
+const PRESET_CUTE = {bg:'#FDEEF6', btn:'#F3AED0'};
+const GENDER_OPTIONS = [
+  {key:'feminino', emoji:'🌸'},
+  {key:'masculino', emoji:'<svg viewBox="0 0 100 100"><circle cx="50" cy="28" r="17" fill="#4A90D9"/><circle cx="73" cy="43" r="17" fill="#4A90D9"/><circle cx="64" cy="70" r="17" fill="#4A90D9"/><circle cx="36" cy="70" r="17" fill="#4A90D9"/><circle cx="27" cy="43" r="17" fill="#4A90D9"/><circle cx="50" cy="50" r="13" fill="#FFD966"/></svg>'},
+  {key:'indefinido', emoji:'💫'}
+];
+function mascotEmoji(){
+  const m = MASCOTS.find(x=>x.key===state.settings.mascot);
+  return m ? m.emoji : '🦊';
+}
+// Retorna o nome personalizado do mascote, se houver, ou o nome padrão da espécie (ex: "Raposa").
+function mascotDisplayName(){
+  const custom = (state.settings.mascotName||'').trim();
+  if(custom) return custom;
+  const m = MASCOTS.find(x=>x.key===state.settings.mascot);
+  return m ? m.name : 'Raposa';
+}
+
+// =================== Patinhas por animal ===================
+// Cada mascote tem seu próprio desenho de "patinha" (SVG, viewBox 100x100, fill=currentColor),
+// usado nos indicadores de progresso do dia e na trilha de movimento semanal.
+const PAW_ICONS = {
+  // Raposa e Cachorro: pata canina, dedinhos bem estufados + contorno branco tipo adesivo + brilho
+  raposa: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="70" rx="27" ry="21"/><ellipse cx="19" cy="34" rx="13" ry="17" transform="rotate(-18 19 34)"/><ellipse cx="45" cy="18" rx="13" ry="17"/><ellipse cx="71" cy="21" rx="13" ry="17" transform="rotate(12 71 21)"/><ellipse cx="84" cy="44" rx="12" ry="16" transform="rotate(32 84 44)"/><circle cx="11" cy="21" r="4" stroke="none"/><circle cx="45" cy="3" r="4" stroke="none"/><circle cx="79" cy="6" r="4" stroke="none"/><circle cx="96" cy="32" r="4" stroke="none"/><ellipse cx="40" cy="61" rx="9" ry="6" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  cachorro: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="70" rx="28" ry="22"/><ellipse cx="18" cy="35" rx="14" ry="18" transform="rotate(-16 18 35)"/><ellipse cx="44" cy="17" rx="14" ry="18"/><ellipse cx="71" cy="20" rx="14" ry="18" transform="rotate(14 71 20)"/><ellipse cx="86" cy="45" rx="13" ry="17" transform="rotate(34 86 45)"/><circle cx="10" cy="20" r="4" stroke="none"/><circle cx="44" cy="2" r="4" stroke="none"/><circle cx="80" cy="5" r="4" stroke="none"/><circle cx="98" cy="33" r="4" stroke="none"/><ellipse cx="39" cy="61" rx="9" ry="6" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  // Gato: almofada em coração + dedinhos redondos e fofos
+  gato: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><path d="M50 48c15 0 31 13 31 31 0 13-14 19-31 19S19 92 19 79c0-18 16-31 31-31z"/><circle cx="23" cy="35" r="11"/><circle cx="42" cy="20" r="11"/><circle cx="61" cy="20" r="11"/><circle cx="79" cy="35" r="11"/><ellipse cx="40" cy="68" rx="8" ry="6" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  // Coelho: pezinho comprido e fofo, com brilho oval
+  coelho: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="63" rx="21" ry="36"/><ellipse cx="29" cy="21" rx="10" ry="15" transform="rotate(-12 29 21)"/><ellipse cx="50" cy="14" rx="10" ry="15"/><ellipse cx="71" cy="21" rx="10" ry="15" transform="rotate(12 71 21)"/><ellipse cx="42" cy="52" rx="7" ry="10" fill="#fff" stroke="none" opacity=".35"/></svg>`,
+  // Panda e Urso: almofada grande e fofinha com dedinhos em arco
+  panda: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="53" cy="67" rx="28" ry="24"/><circle cx="23" cy="31" r="9"/><circle cx="43" cy="15" r="9"/><circle cx="65" cy="15" r="9"/><circle cx="85" cy="31" r="9"/><circle cx="94" cy="49" r="8"/><ellipse cx="13" cy="63" rx="10" ry="13" transform="rotate(-20 13 63)"/><ellipse cx="41" cy="60" rx="8" ry="6" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  urso: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="66" rx="33" ry="27"/><circle cx="17" cy="29" r="11"/><circle cx="38" cy="13" r="11"/><circle cx="61" cy="13" r="11"/><circle cx="81" cy="27" r="11"/><circle cx="91" cy="47" r="10"/><ellipse cx="38" cy="59" rx="10" ry="7" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  // Coruja: pegada de ave com pontinhas arredondadas (bem mais fofa que dedos retos)
+  coruja: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><circle cx="50" cy="55" r="19"/><ellipse cx="38" cy="40" rx="9" ry="10" transform="rotate(-18 38 40)"/><ellipse cx="62" cy="40" rx="9" ry="10" transform="rotate(18 62 40)"/><ellipse cx="38" cy="71" rx="9" ry="10" transform="rotate(18 38 71)"/><ellipse cx="62" cy="71" rx="9" ry="10" transform="rotate(-18 62 71)"/><ellipse cx="46" cy="50" rx="6" ry="5" fill="#fff" stroke="none" opacity=".3"/></svg>`,
+  // Coala: 4 dedos com um espaço marcado no meio, lembrando os polegares opositores
+  coala: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="68" rx="30" ry="24"/><ellipse cx="15" cy="40" rx="10" ry="14" transform="rotate(-35 15 40)"/><ellipse cx="26" cy="19" rx="10" ry="14" transform="rotate(-8 26 19)"/><circle cx="56" cy="14" r="10"/><circle cx="77" cy="20" r="10"/><circle cx="91" cy="38" r="10"/><ellipse cx="40" cy="62" rx="9" ry="7" fill="#fff" stroke="none" opacity=".4"/></svg>`,
+  // Dragão e Dinossauro: pata de réptil com 3 garras curvas pra frente + esporão atrás
+  dragao: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="50" cy="72" rx="26" ry="19"/><path d="M40 55 L27 22 L38 20 L46 50z"/><path d="M55 52 L54 15 L64 15 L61 50z"/><path d="M68 55 L79 24 L69 20 L62 50z"/><path d="M27 75 L10 68 L14 78 L27 84z"/><ellipse cx="42" cy="65" rx="8" ry="6" fill="#fff" stroke="none" opacity=".35"/></svg>`,
+  dino: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="50" cy="73" rx="27" ry="20"/><path d="M38 56 L26 24 L37 21 L45 51z"/><path d="M55 53 L54 16 L64 16 L61 50z"/><path d="M68 56 L80 26 L70 22 L62 51z"/><ellipse cx="42" cy="66" rx="9" ry="6" fill="#fff" stroke="none" opacity=".35"/></svg>`,
+  // Leão e Tigre: pata felina grande e robusta
+  leao: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><path d="M50 46c17 0 33 14 33 33 0 14-15 20-33 20S17 93 17 79c0-19 16-33 33-33z"/><circle cx="21" cy="33" r="12"/><circle cx="42" cy="17" r="12"/><circle cx="63" cy="17" r="12"/><circle cx="84" cy="33" r="12"/><ellipse cx="40" cy="68" rx="9" ry="7" fill="#fff" stroke="none" opacity=".35"/></svg>`,
+  tigre: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><path d="M50 46c17 0 32 14 32 32 0 14-14 21-32 21S18 92 18 78c0-18 15-32 32-32z"/><circle cx="22" cy="33" r="11"/><circle cx="42" cy="18" r="11"/><circle cx="63" cy="18" r="11"/><circle cx="83" cy="33" r="11"/><path d="M30 60 l8 10 M50 55 l0 12 M70 60 l-8 10" stroke-width="3" opacity=".5"/><ellipse cx="40" cy="68" rx="9" ry="7" fill="#fff" stroke="none" opacity=".35"/></svg>`,
+  // Pinguim: pezinho palmado, largo e curtinho
+  pinguim: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="#fff" stroke-width="3" stroke-linejoin="round"><ellipse cx="50" cy="63" rx="33" ry="26"/><ellipse cx="50" cy="28" rx="9" ry="20" fill="currentColor" stroke="none"/><ellipse cx="23" cy="37" rx="8" ry="18" transform="rotate(-24 23 37)" fill="currentColor" stroke="none"/><ellipse cx="77" cy="37" rx="8" ry="18" transform="rotate(24 77 37)" fill="currentColor" stroke="none"/><ellipse cx="40" cy="60" rx="9" ry="7" fill="#fff" stroke="none" opacity=".35"/></svg>`
+};
+function pawIconSVG(){
+  return PAW_ICONS[state.settings.mascot] || PAW_ICONS.raposa;
+}
+// Favicon dinâmico: desenha a patinha do mascote atual sobre o gradiente roxo da marca
+function updateFavicon(){
+  try{
+    const inner = pawIconSVG()
+      .replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
+      .replace(/currentColor/g, '#ffffff');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">`
+      + `<defs><linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">`
+      + `<stop offset="0%" stop-color="#C6AEF5"/><stop offset="100%" stop-color="#7C55D6"/></linearGradient></defs>`
+      + `<rect width="100" height="100" rx="22" fill="url(#fg)"/>`
+      + `<g fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" transform="translate(9,9) scale(0.82)">${inner}</g></svg>`;
+    const link = document.getElementById('dynamicFavicon');
+    if(link) link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }catch(e){}
+}
+function applyPawIcons(){
+  document.querySelectorAll('.paw-item .p').forEach(el=>{ el.innerHTML = pawIconSVG(); });
+  renderExercise();
+}
+
+// =================== Internacionalização (i18n) ===================
+// Estrutura de dicionários por idioma. Em um app real (React Native/Flutter) cada bloco
+// abaixo viraria um arquivo separado, ex: /locales/pt-BR.json, /locales/en-US.json etc.
+const LOCALES = ['pt-BR', 'pt-PT', 'en-US', 'es-ES'];
+const LOCALE_NAMES = { 'pt-BR':'Português (Brasil)', 'pt-PT':'Português (Portugal)', 'en-US':'English (United States)', 'es-ES':'Español' };
+const I18N = {
+  'pt-BR': {
+    nav:{config:'Config', week:'Semana', movement:'Movimento', health:'Saúde & Água', cycle:'Ciclo', calm:'Calma', ideas:'Ideias & Conquistas'},
+    config:{
+      colorsTitle:'Cores do aplicativo',
+      colorsDesc:'Fundo e botões ficam em tons claros; as letras podem ser escuras, para manter tudo confortável de ler.',
+      bgLabel:'Fundo', btnLabel:'Botões', textLabel:'Letras', resetBtn:'Restaurar cores padrão',
+      mascotTitle:'Escolha seu mascote', mascotDesc:'Ele aparece no topo do app e nas suas mensagens de apoio.',
+      mascotNameLabel:'Nome do mascote', mascotNamePlaceholder:'ex: Fofinho (opcional)',
+      languageTitle:'Idioma', languageDesc:'Escolha o idioma do aplicativo.',
+      genderTitle:'Gênero', genderDesc:'Isso ajusta o visual do app e se a aba de Ciclo aparece. Você pode mudar quando quiser.',
+      googleTitle:'Conta Google', googleDesc:'Conecte sua conta Google pra guardar uma cópia dos seus dados na nuvem e enviar suas tarefas pro Google Agenda automaticamente.',
+      googleNeedsId:'Pra usar isso, você precisa criar um "Client ID" gratuito na sua própria conta Google (leva uns minutos). Cole ele aqui:',
+      googleSaveId:'Salvar Client ID', googleIdHint:'Ainda sem Client ID? Veja o passo a passo no README do projeto.',
+      googleIdSaved:'Client ID salvo! Agora é só conectar.', googleConnect:'Conectar com Google',
+      googleSyncNow:'Sincronizar agora', googleDisconnect:'Desconectar',
+      googleAutoCalendar:'Enviar novas tarefas pro Google Agenda automaticamente',
+      googleConnectedAs:'Conectado como', googleConnectedGeneric:'Conectado à sua conta Google',
+      googleSyncing:'Sincronizando...', googleSyncSuccess:'Sincronizado! {count} tarefa(s) enviada(s) pro Google Agenda.',
+      googleDisconnected:'Desconectado da sua conta Google.', googleError:'Não consegui conectar agora. Confira o Client ID e tente de novo.',
+      googleLibNotReady:'O Google ainda está carregando, tenta de novo em alguns segundos.'
+    },
+    week:{
+      title:'Sua semana, sem sobrecarga', dragHint:'Dica: segure e arraste um card de tarefa para movê-lo para outro dia, ou use os botões ⬅️➡️.',
+      taskPlaceholder:'Nova tarefa...', archiveBtn:'Limpar concluídas', icsBtn:'Exportar .ics',
+      viewHoje:'Só hoje', viewSemana:'Semana toda',
+      warehouseTitle:'Armazém de Ideias', warehouseDesc:'Ideias que valem a pena guardar de verdade — sem pressa para usar.', warehousePlaceholder:'Uma ideia para guardar...', moveToWarehouseLabel:'Guardar esta ideia no Armazém',
+      ideasTitle:'Lixeira das Ideias (Dump Mental)', ideasDesc:'Jogue aqui pensamentos soltos que não precisam entrar na semana agora.',
+      ideaPlaceholder:'Solte um pensamento...', guardarBtn:'Guardar'
+    },
+    movement:{ title:'Patinhas em Movimento', desc:'Qualquer movimento conta! 15 minutos já é uma grande vitória 🌸', streakLabel:'Dias com movimento nesta semana' },
+    health:{
+      waterTitle:'Calculadora de Hidratação', pesoPlaceholder:'Peso (kg)', alturaPlaceholder:'Altura (cm)', idadePlaceholder:'Idade',
+      calcBtn:'Calcular meta', snackBtn:'Lembrete de lanche',
+      weightTitle:'Peso & IMC — acolhedor, sem julgamento', logWeightBtn:'Registrar peso de hoje'
+    },
+    calm:{
+      title:'Cantinho da Calma', startBtn:'Começar', stopBtn:'Parar',
+      soundsTitle:'Sons para focar ou relaxar', soundsDesc:'Sons gerados na hora, sem precisar de internet.',
+      soundHint:'O tom binaural funciona melhor com fones de ouvido 🎧',
+      soundWaves:'🌊 Ondas do Mar', soundBreeze:'🍃 Brisa Suave', soundBinaural:'🎵 Tom Binaural', soundSoft:'🌙 Toque Suave'
+    },
+    ideas:{
+      ideasTitle:'Ideias soltas', summaryTitle:'Resumo da semana', muralTitle:'Mural das Conquistas',
+      backupTitle:'Backup', backupDesc:'Guarde uma cópia dos seus dados ou restaure de um backup anterior.',
+      exportBtn:'Exportar backup', importBtn:'Importar backup'
+    },
+    cycle:{
+      configTitle:'Meu Ciclo', configDesc:'Essas informações ajudam o app a ajustar suas metas com mais gentileza.',
+      lastPeriodLabel:'Início da última menstruação', periodLenLabel:'Duração da menstruação (dias)', cycleLenLabel:'Duração do ciclo (dias)',
+      saveBtn:'Salvar dados do ciclo', phaseTitle:'Fase atual', dayOfCycleLabel:'Dia',
+      notSetMsg:'Registre a data da sua última menstruação para acompanhar sua fase do ciclo 🌙',
+      symptomsTitle:'Sintomas de hoje', symptomsDesc:'Toque para marcar o que você está sentindo hoje.'
+    },
+    phases:{ menstrual:'Menstrual', folicular:'Folicular', ovulatoria:'Ovulatória', lutea:'Lútea' },
+    gender:{ feminino:'Feminino', masculino:'Masculino', indefinido:'Prefiro não informar' },
+    phaseDesc:{
+      menstrual:'Fase de descanso. Vamos com calma hoje 🌙', folicular:'Energia crescendo aos poucos 🌱',
+      ovulatoria:'Pico de energia — aproveite se fizer sentido 🌸', lutea:'Corpo pedindo mais gentileza. Sem pressa 💜'
+    },
+    symptoms:{ colica:'Cólica', cansaco:'Cansaço', humor:'Humor', foco:'Nível de Foco', inchaco:'Inchaço' },
+    toast:{
+      saveError:'Não consegui salvar agora — verifique o espaço de armazenamento do navegador 🦊',
+      mascotIntro:'Oi, sou {name} e vou te acompanhar por aqui! 💜',
+      colorsReset:'Cores restauradas para o padrão 🌸',
+      notifUnsupported:'Seu navegador não suporta notificações, mas eu aviso por aqui! 🦊',
+      notifGranted:'Combinado! Vou te lembrar de beber água e das suas tarefas pendentes de vez em quando 🔔',
+      notifDenied:'Sem problemas, vou te lembrar por aqui na tela então 🌸',
+      waterReminder:'Hora de beber uma aguinha! 💧',
+      notifTaskReminder:'Você tem {count} tarefa(s) pendente(s) hoje. Que tal dar uma olhadinha? 📋', notifDisabled:'Combinado, vou parar de te lembrar por aqui 🌸',
+      cycleNeedDate:'Escolha a data de início para eu conseguir calcular sua fase 🌙',
+      cycleSaved:'Prontinho! Vou ajustar suas metas com mais carinho conforme sua fase 🌙',
+      dayFull:'Tarefa adicionada! Esse dia já está bem cheio — que tal mover algo para outro dia? 🦊💤',
+      subtaskLimit:'Até 3 micro-passos por tarefa, para não pesar! 🐾',
+      ideaSaved:'Guardei essa ideia com carinho, pode focar no resto 🌸',
+      warehouseSaved:'Guardado no Armazém com carinho 📦', movedToWarehouse:'Ideia guardada no Armazém, ela não vai se perder 📦',
+      genderChanged:'Prontinho! Ajustei o app conforme sua escolha 🌸',
+      mascotRenamed:'Prazer, {name}! Vou te chamar assim daqui pra frente 💜',
+      exerciseLogged:'Arrasou! Qualquer movimento é uma vitória 🏅',
+      needWeight:'Preciso do seu peso para calcular a meta com carinho 🌸',
+      waterGoalCalculated:'Meta calculada! Vamos beber aos poucos, sem pressa 💧',
+      waterGoalReached:'Meta de água batida! Seu corpo agradece 💙',
+      snackReminder:'Que tal uma fruta ou um lanchinho leve agora? Isso ajuda a manter sua energia 🍎',
+      invalidWeight:'Não consegui entender esse número, tenta de novo? 🌸',
+      weightThanks:'Obrigado por confiar essa informação a mim 💜',
+      noTasksWeekHelp:'Não vejo tarefas pendentes essa semana — aproveite para descansar 🌸',
+      chooseTask:'Vamos começar por: "{task}"{suffix} 🦊 Você consegue!',
+      noTasksWeekFocus:'Nenhuma tarefa pendente essa semana para focar — respire e aproveite 🌸',
+      timeUp:'Tempo esgotado! Quer continuar por mais um pouco? 🦊',
+      taskDoneCelebrate:'Excelente! Uma vitória a mais no seu dia 🎉',
+      backupExported:'Backup exportado! Guarde esse arquivo num lugar seguro 💾',
+      backupRestored:'Backup restaurado com sucesso! Bem-vinda(o) de volta 🌸',
+      backupBadFile:'Não consegui ler esse arquivo — confira se é o backup certo 🦊',
+      nothingToArchive:'Nada para limpar agora — sua semana já está levinha 🌸',
+      archived:'Limpei {count} tarefa(s) concluída(s) da semana. Elas continuam guardadas no Mural das Conquistas 🏆',
+      noTasksToExport:'Não há tarefas pendentes para exportar agora 🌸',
+      icsExported:'Agenda exportada! Importe o arquivo .ics no Google Agenda ou Apple Calendar 📅'
+    },
+    common:{ helpChoose:'Me ajude a escolher', focusNow:'Focar agora', mfDone:'Concluí!', mfExit:'Sair', save:'Salvar', cancel:'Cancelar' },
+    charts:{ title:'Histórico dos últimos meses', waterLabel:'Água (ml/dia)', weightLabel:'Peso (kg)', cycleLabel:'Duração dos últimos ciclos', notEnoughData:'Ainda não há dias suficientes registrados 🌱', notEnoughWeight:'Registre seu peso em pelo menos 2 dias diferentes para ver o gráfico 🌱', notEnoughCycle:'Registre o início de pelo menos 2 menstruações para ver a duração dos ciclos 🌙' },
+    mascotMsgs:[
+      "Um passo de cada vez! 🐾", "Patinha por patinha, você consegue! 🦊",
+      "Qualquer movimento conta, viu? 🌸", "Tá tudo bem ir devagar hoje 💜",
+      "Você já fez mais do que imagina hoje 🐱", "Respire fundo, a gente cuida do resto 🌿"
+    ]
+  },
+  'pt-PT': {
+    nav:{config:'Config', week:'Semana', movement:'Movimento', health:'Saúde & Água', cycle:'Ciclo', calm:'Calma', ideas:'Ideias & Conquistas'},
+    config:{
+      colorsTitle:'Cores da aplicação',
+      colorsDesc:'O fundo e os botões ficam em tons claros; as letras podem ser escuras, para manter tudo confortável de ler.',
+      bgLabel:'Fundo', btnLabel:'Botões', textLabel:'Letras', resetBtn:'Restaurar cores predefinidas',
+      mascotTitle:'Escolhe a tua mascote', mascotDesc:'Aparece no topo da app e nas tuas mensagens de apoio.',
+      mascotNameLabel:'Nome da mascote', mascotNamePlaceholder:'ex: Fofinho (opcional)',
+      languageTitle:'Idioma', languageDesc:'Escolhe o idioma da aplicação.',
+      genderTitle:'Género', genderDesc:'Isto ajusta o visual da app e se o separador de Ciclo aparece. Podes mudar quando quiseres.',
+      googleTitle:'Conta Google', googleDesc:'Liga a tua conta Google para guardares uma cópia dos teus dados na nuvem e enviares as tuas tarefas para o Google Agenda automaticamente.',
+      googleNeedsId:'Para usares isto, precisas de criar um "Client ID" gratuito na tua própria conta Google (leva uns minutos). Cola-o aqui:',
+      googleSaveId:'Guardar Client ID', googleIdHint:'Ainda sem Client ID? Vê o passo a passo no README do projeto.',
+      googleIdSaved:'Client ID guardado! Agora é só ligares.', googleConnect:'Ligar com Google',
+      googleSyncNow:'Sincronizar agora', googleDisconnect:'Desligar',
+      googleAutoCalendar:'Enviar novas tarefas para o Google Agenda automaticamente',
+      googleConnectedAs:'Ligado como', googleConnectedGeneric:'Ligado à tua conta Google',
+      googleSyncing:'A sincronizar...', googleSyncSuccess:'Sincronizado! {count} tarefa(s) enviada(s) para o Google Agenda.',
+      googleDisconnected:'Desligado da tua conta Google.', googleError:'Não consegui ligar agora. Confirma o Client ID e tenta outra vez.',
+      googleLibNotReady:'O Google ainda está a carregar, tenta outra vez daqui a uns segundos.'
+    },
+    week:{
+      title:'A tua semana, sem sobrecarga', dragHint:'Dica: mantém premido um cartão de tarefa e arrasta-o para outro dia, ou usa os botões ⬅️➡️.',
+      taskPlaceholder:'Nova tarefa...', archiveBtn:'Limpar concluídas', icsBtn:'Exportar .ics',
+      viewHoje:'Só hoje', viewSemana:'Semana toda',
+      warehouseTitle:'Armazém de Ideias', warehouseDesc:'Ideias que vale a pena guardar mesmo — sem pressa para as usar.', warehousePlaceholder:'Uma ideia para guardar...', moveToWarehouseLabel:'Guardar esta ideia no Armazém',
+      ideasTitle:'Caixote das Ideias', ideasDesc:'Deixa aqui pensamentos soltos que não precisam de entrar na semana agora.',
+      ideaPlaceholder:'Solta um pensamento...', guardarBtn:'Guardar'
+    },
+    movement:{ title:'Patas em Movimento', desc:'Qualquer movimento conta! 15 minutos já é uma grande vitória 🌸', streakLabel:'Dias com movimento esta semana' },
+    health:{
+      waterTitle:'Calculadora de Hidratação', pesoPlaceholder:'Peso (kg)', alturaPlaceholder:'Altura (cm)', idadePlaceholder:'Idade',
+      calcBtn:'Calcular meta', snackBtn:'Lembrete de lanche',
+      weightTitle:'Peso & IMC — com carinho, sem julgamentos', logWeightBtn:'Registar peso de hoje'
+    },
+    calm:{
+      title:'Cantinho da Calma', startBtn:'Começar', stopBtn:'Parar',
+      soundsTitle:'Sons para te concentrares ou relaxares', soundsDesc:'Sons gerados na hora, sem precisar de internet.',
+      soundHint:'O tom binaural funciona melhor com auscultadores 🎧',
+      soundWaves:'🌊 Ondas do Mar', soundBreeze:'🍃 Brisa Suave', soundBinaural:'🎵 Tom Binaural', soundSoft:'🌙 Toque Suave'
+    },
+    ideas:{
+      ideasTitle:'Ideias soltas', summaryTitle:'Resumo da semana', muralTitle:'Placar das Conquistas',
+      backupTitle:'Cópia de segurança', backupDesc:'Guarda uma cópia dos teus dados ou restaura uma cópia anterior.',
+      exportBtn:'Exportar cópia', importBtn:'Importar cópia'
+    },
+    cycle:{
+      configTitle:'O Meu Ciclo', configDesc:'Esta informação ajuda a app a ajustar as tuas metas com mais delicadeza.',
+      lastPeriodLabel:'Início da última menstruação', periodLenLabel:'Duração da menstruação (dias)', cycleLenLabel:'Duração do ciclo (dias)',
+      saveBtn:'Guardar dados do ciclo', phaseTitle:'Fase atual', dayOfCycleLabel:'Dia',
+      notSetMsg:'Regista a data da tua última menstruação para acompanhares a tua fase do ciclo 🌙',
+      symptomsTitle:'Sintomas de hoje', symptomsDesc:'Toca para assinalar o que estás a sentir hoje.'
+    },
+    phases:{ menstrual:'Menstrual', folicular:'Folicular', ovulatoria:'Ovulatória', lutea:'Lútea' },
+    gender:{ feminino:'Feminino', masculino:'Masculino', indefinido:'Prefiro não informar' },
+    phaseDesc:{
+      menstrual:'Fase de descanso. Vamos com calma hoje 🌙', folicular:'Energia a crescer aos poucos 🌱',
+      ovulatoria:'Pico de energia — aproveita se fizer sentido 🌸', lutea:'Corpo a pedir mais delicadeza. Sem pressa 💜'
+    },
+    symptoms:{ colica:'Dores menstruais', cansaco:'Cansaço', humor:'Humor', foco:'Nível de concentração', inchaco:'Inchaço' },
+    toast:{
+      saveError:'Não consegui guardar agora — verifica o espaço de armazenamento do navegador 🦊',
+      mascotIntro:'Olá, sou {name} e vou acompanhar-te por aqui! 💜',
+      colorsReset:'Cores restauradas para as predefinições 🌸',
+      notifUnsupported:'O teu navegador não suporta notificações, mas aviso-te por aqui! 🦊',
+      notifGranted:'Combinado! Vou lembrar-te de beber água e das tuas tarefas pendentes de vez em quando 🔔',
+      notifDenied:'Sem problema, vou lembrar-te por aqui no ecrã então 🌸',
+      waterReminder:'Hora de beber um pouco de água! 💧',
+      notifTaskReminder:'Tens {count} tarefa(s) pendente(s) hoje. Que tal dares uma vista de olhos? 📋', notifDisabled:'Combinado, vou parar de te lembrar por aqui 🌸',
+      cycleNeedDate:'Escolhe a data de início para eu conseguir calcular a tua fase 🌙',
+      cycleSaved:'Pronto! Vou ajustar as tuas metas com mais carinho conforme a tua fase 🌙',
+      dayFull:'Tarefa adicionada! Esse dia já está bem cheio — que tal mover algo para outro dia? 🦊💤',
+      subtaskLimit:'Até 3 micro-passos por tarefa, para não pesar! 🐾',
+      ideaSaved:'Guardei essa ideia com carinho, podes focar-te no resto 🌸',
+      warehouseSaved:'Guardado no Armazém com carinho 📦', movedToWarehouse:'Ideia guardada no Armazém, não se vai perder 📦',
+      genderChanged:'Pronto! Ajustei a app conforme a tua escolha 🌸',
+      mascotRenamed:'Prazer, {name}! Vou chamar-te assim a partir de agora 💜',
+      exerciseLogged:'Boa! Qualquer movimento é uma vitória 🏅',
+      needWeight:'Preciso do teu peso para calcular a meta com carinho 🌸',
+      waterGoalCalculated:'Meta calculada! Vamos beber aos poucos, sem pressa 💧',
+      waterGoalReached:'Meta de água atingida! O teu corpo agradece 💙',
+      snackReminder:'Que tal uma peça de fruta ou um lanche leve agora? Ajuda a manter a tua energia 🍎',
+      invalidWeight:'Não consegui perceber esse número, tenta outra vez? 🌸',
+      weightThanks:'Obrigado por confiares essa informação a mim 💜',
+      noTasksWeekHelp:'Não vejo tarefas pendentes esta semana — aproveita para descansar 🌸',
+      chooseTask:'Vamos começar por: "{task}"{suffix} 🦊 Tu consegues!',
+      noTasksWeekFocus:'Nenhuma tarefa pendente esta semana para focares — respira e aproveita 🌸',
+      timeUp:'Tempo esgotado! Queres continuar mais um pouco? 🦊',
+      taskDoneCelebrate:'Excelente! Mais uma vitória no teu dia 🎉',
+      backupExported:'Cópia exportada! Guarda esse ficheiro num sítio seguro 💾',
+      backupRestored:'Cópia restaurada com sucesso! Bem-vinda(o) de volta 🌸',
+      backupBadFile:'Não consegui ler esse ficheiro — confirma se é a cópia certa 🦊',
+      nothingToArchive:'Nada para limpar agora — a tua semana já está leve 🌸',
+      archived:'Limpei {count} tarefa(s) concluída(s) da semana. Continuam guardadas no Placar das Conquistas 🏆',
+      noTasksToExport:'Não há tarefas pendentes para exportar agora 🌸',
+      icsExported:'Agenda exportada! Importa o ficheiro .ics no Google Agenda ou Apple Calendar 📅'
+    },
+    common:{ helpChoose:'Ajuda-me a escolher', focusNow:'Focar agora', mfDone:'Consegui!', mfExit:'Sair', save:'Guardar', cancel:'Cancelar' },
+    charts:{ title:'Histórico dos últimos meses', waterLabel:'Água (ml/dia)', weightLabel:'Peso (kg)', cycleLabel:'Duração dos últimos ciclos', notEnoughData:'Ainda não há dias suficientes registados 🌱', notEnoughWeight:'Regista o teu peso em pelo menos 2 dias diferentes para veres o gráfico 🌱', notEnoughCycle:'Regista o início de pelo menos 2 menstruações para veres a duração dos ciclos 🌙' },
+    mascotMsgs:[
+      "Um passo de cada vez! 🐾", "Passo a passo, tu consegues! 🦊",
+      "Qualquer movimento conta, sabias? 🌸", "Não faz mal ir devagar hoje 💜",
+      "Já fizeste mais do que imaginas hoje 🐱", "Respira fundo, nós tratamos do resto 🌿"
+    ]
+  },
+  'en-US': {
+    nav:{config:'Settings', week:'Week', movement:'Movement', health:'Health & Water', cycle:'Cycle', calm:'Calm', ideas:'Ideas & Achievements'},
+    config:{
+      colorsTitle:'App colors',
+      colorsDesc:"Background and buttons stay in light tones; text can be dark, so everything stays comfortable to read.",
+      bgLabel:'Background', btnLabel:'Buttons', textLabel:'Text', resetBtn:'Restore default colors',
+      mascotTitle:'Choose your mascot', mascotDesc:'It shows up at the top of the app and in your support messages.',
+      mascotNameLabel:'Mascot name', mascotNamePlaceholder:'e.g. Buddy (optional)',
+      languageTitle:'Language', languageDesc:'Choose the app language.',
+      genderTitle:'Gender', genderDesc:'This adjusts the app\'s look and whether the Cycle tab shows up. You can change it anytime.',
+      googleTitle:'Google Account', googleDesc:'Connect your Google account to keep a cloud copy of your data and automatically send your tasks to Google Calendar.',
+      googleNeedsId:'To use this, you need a free "Client ID" from your own Google account (takes a few minutes). Paste it here:',
+      googleSaveId:'Save Client ID', googleIdHint:'Don\'t have a Client ID yet? Check the step-by-step guide in the project README.',
+      googleIdSaved:'Client ID saved! Now just connect.', googleConnect:'Connect with Google',
+      googleSyncNow:'Sync now', googleDisconnect:'Disconnect',
+      googleAutoCalendar:'Automatically send new tasks to Google Calendar',
+      googleConnectedAs:'Connected as', googleConnectedGeneric:'Connected to your Google account',
+      googleSyncing:'Syncing...', googleSyncSuccess:'Synced! {count} task(s) sent to Google Calendar.',
+      googleDisconnected:'Disconnected from your Google account.', googleError:'Couldn\'t connect right now. Check the Client ID and try again.',
+      googleLibNotReady:'Google is still loading, try again in a few seconds.'
+    },
+    week:{
+      title:'Your week, without overload', dragHint:'Tip: press and hold a task card to drag it to another day, or use the ⬅️➡️ buttons.',
+      taskPlaceholder:'New task...', archiveBtn:'Clear completed', icsBtn:'Export .ics',
+      viewHoje:'Today only', viewSemana:'Full week',
+      warehouseTitle:'Idea Storage', warehouseDesc:"Ideas worth keeping for real — no rush to use them.", warehousePlaceholder:'An idea to keep...', moveToWarehouseLabel:'Save this idea to Storage',
+      ideasTitle:'Idea Dump', ideasDesc:"Drop loose thoughts here that don't need to be part of the week right now.",
+      ideaPlaceholder:'Drop a thought...', guardarBtn:'Save'
+    },
+    movement:{ title:'Paws in Motion', desc:'Any movement counts! 15 minutes is already a big win 🌸', streakLabel:'Days with movement this week' },
+    health:{
+      waterTitle:'Hydration Calculator', pesoPlaceholder:'Weight (kg)', alturaPlaceholder:'Height (cm)', idadePlaceholder:'Age',
+      calcBtn:'Calculate goal', snackBtn:'Snack reminder',
+      weightTitle:'Weight & BMI — kind, no judgment', logWeightBtn:"Log today's weight"
+    },
+    calm:{
+      title:'Calm Corner', startBtn:'Start', stopBtn:'Stop',
+      soundsTitle:'Sounds to focus or relax', soundsDesc:'Sounds generated on the spot, no internet needed.',
+      soundHint:'The binaural tone works best with headphones 🎧',
+      soundWaves:'🌊 Ocean Waves', soundBreeze:'🍃 Soft Breeze', soundBinaural:'🎵 Binaural Tone', soundSoft:'🌙 Soft Chime'
+    },
+    ideas:{
+      ideasTitle:'Loose ideas', summaryTitle:'Week summary', muralTitle:'Achievements Wall',
+      backupTitle:'Backup', backupDesc:'Save a copy of your data or restore a previous backup.',
+      exportBtn:'Export backup', importBtn:'Import backup'
+    },
+    cycle:{
+      configTitle:'My Cycle', configDesc:'This information helps the app adjust your goals more gently.',
+      lastPeriodLabel:'Start of last period', periodLenLabel:'Period length (days)', cycleLenLabel:'Cycle length (days)',
+      saveBtn:'Save cycle data', phaseTitle:'Current phase', dayOfCycleLabel:'Day',
+      notSetMsg:'Log the start date of your last period to track your cycle phase 🌙',
+      symptomsTitle:"Today's symptoms", symptomsDesc:"Tap to mark what you're feeling today."
+    },
+    phases:{ menstrual:'Menstrual', folicular:'Follicular', ovulatoria:'Ovulatory', lutea:'Luteal' },
+    gender:{ feminino:'Female', masculino:'Male', indefinido:'Prefer not to say' },
+    phaseDesc:{
+      menstrual:"Resting phase. Let's take it easy today 🌙", folicular:'Energy building up little by little 🌱',
+      ovulatoria:"Energy peak — make the most of it if it feels right 🌸", lutea:'Body asking for more gentleness. No rush 💜'
+    },
+    symptoms:{ colica:'Cramps', cansaco:'Fatigue', humor:'Mood', foco:'Focus level', inchaco:'Bloating' },
+    toast:{
+      saveError:'I couldn\'t save right now — check your browser\'s storage space 🦊',
+      mascotIntro:'Hi, I\'m {name} and I\'ll be with you here! 💜',
+      colorsReset:'Colors restored to default 🌸',
+      notifUnsupported:'Your browser doesn\'t support notifications, but I\'ll remind you here! 🦊',
+      notifGranted:"Deal! I'll remind you about water and your pending tasks from time to time 🔔",
+      notifDenied:'No worries, I\'ll remind you right here on screen then 🌸',
+      waterReminder:'Time for a little water! 💧',
+      notifTaskReminder:'You have {count} pending task(s) today. Want to take a look? 📋', notifDisabled:"Got it, I'll stop reminding you here 🌸",
+      cycleNeedDate:'Pick the start date so I can calculate your phase 🌙',
+      cycleSaved:'All set! I\'ll adjust your goals more gently based on your phase 🌙',
+      dayFull:'Task added! This day is already pretty full — how about moving something to another day? 🦊💤',
+      subtaskLimit:'Up to 3 micro-steps per task, to keep it light! 🐾',
+      ideaSaved:'Saved that thought with care, you can focus on the rest now 🌸',
+      warehouseSaved:'Saved to Storage with care 📦', movedToWarehouse:"Idea saved to Storage, it won't get lost 📦",
+      genderChanged:'All set! I adjusted the app based on your choice 🌸',
+      mascotRenamed:"Nice to meet you, {name}! I'll call you that from now on 💜",
+      exerciseLogged:'Great job! Any movement is a win 🏅',
+      needWeight:'I need your weight to calculate the goal with care 🌸',
+      waterGoalCalculated:'Goal calculated! Let\'s drink little by little, no rush 💧',
+      waterGoalReached:'Water goal reached! Your body thanks you 💙',
+      snackReminder:'How about a piece of fruit or a light snack now? It helps keep your energy up 🍎',
+      invalidWeight:'I couldn\'t understand that number, try again? 🌸',
+      weightThanks:'Thank you for trusting me with that 💜',
+      noTasksWeekHelp:'I don\'t see any pending tasks this week — enjoy some rest 🌸',
+      chooseTask:'Let\'s start with: "{task}"{suffix} 🦊 You\'ve got this!',
+      noTasksWeekFocus:'No pending tasks this week to focus on — breathe and enjoy 🌸',
+      timeUp:'Time\'s up! Want to keep going a little longer? 🦊',
+      taskDoneCelebrate:'Excellent! One more win in your day 🎉',
+      backupExported:'Backup exported! Keep this file somewhere safe 💾',
+      backupRestored:'Backup restored successfully! Welcome back 🌸',
+      backupBadFile:'I couldn\'t read that file — check if it\'s the right backup 🦊',
+      nothingToArchive:'Nothing to clear right now — your week is already light 🌸',
+      archived:'Cleared {count} completed task(s) from the week. They\'re still saved in the Achievements Wall 🏆',
+      noTasksToExport:'No pending tasks to export right now 🌸',
+      icsExported:'Calendar exported! Import the .ics file into Google Calendar or Apple Calendar 📅'
+    },
+    common:{ helpChoose:'Help me choose', focusNow:'Focus now', mfDone:'Done!', mfExit:'Exit', save:'Save', cancel:'Cancel' },
+    charts:{ title:'History over the months', waterLabel:'Water (ml/day)', weightLabel:'Weight (kg)', cycleLabel:'Length of recent cycles', notEnoughData:'Not enough days logged yet 🌱', notEnoughWeight:'Log your weight on at least 2 different days to see the chart 🌱', notEnoughCycle:'Log the start of at least 2 periods to see cycle length 🌙' },
+    mascotMsgs:[
+      "One step at a time! 🐾", "Paw by paw, you've got this! 🦊",
+      "Any movement counts, you know? 🌸", "It's okay to go slow today 💜",
+      "You've already done more than you think today 🐱", "Take a deep breath, we've got the rest 🌿"
+    ]
+  },
+  'es-ES': {
+    nav:{config:'Ajustes', week:'Semana', movement:'Movimiento', health:'Salud y Agua', cycle:'Ciclo', calm:'Calma', ideas:'Ideas y Logros'},
+    config:{
+      colorsTitle:'Colores de la aplicación',
+      colorsDesc:'El fondo y los botones son en tonos claros; las letras pueden ser oscuras, para que todo sea cómodo de leer.',
+      bgLabel:'Fondo', btnLabel:'Botones', textLabel:'Letras', resetBtn:'Restaurar colores predeterminados',
+      mascotTitle:'Elige tu mascota', mascotDesc:'Aparece en la parte superior de la app y en tus mensajes de apoyo.',
+      mascotNameLabel:'Nombre de la mascota', mascotNamePlaceholder:'ej: Peludo (opcional)',
+      languageTitle:'Idioma', languageDesc:'Elige el idioma de la aplicación.',
+      genderTitle:'Género', genderDesc:'Esto ajusta el aspecto de la app y si aparece la pestaña de Ciclo. Puedes cambiarlo cuando quieras.',
+      googleTitle:'Cuenta de Google', googleDesc:'Conecta tu cuenta de Google para guardar una copia de tus datos en la nube y enviar tus tareas a Google Calendar automáticamente.',
+      googleNeedsId:'Para usar esto, necesitas crear un "Client ID" gratuito en tu propia cuenta de Google (lleva unos minutos). Pégalo aquí:',
+      googleSaveId:'Guardar Client ID', googleIdHint:'¿Todavía no tienes un Client ID? Consulta la guía paso a paso en el README del proyecto.',
+      googleIdSaved:'¡Client ID guardado! Ahora solo falta conectar.', googleConnect:'Conectar con Google',
+      googleSyncNow:'Sincronizar ahora', googleDisconnect:'Desconectar',
+      googleAutoCalendar:'Enviar nuevas tareas a Google Calendar automáticamente',
+      googleConnectedAs:'Conectado como', googleConnectedGeneric:'Conectado a tu cuenta de Google',
+      googleSyncing:'Sincronizando...', googleSyncSuccess:'¡Sincronizado! {count} tarea(s) enviada(s) a Google Calendar.',
+      googleDisconnected:'Desconectado de tu cuenta de Google.', googleError:'No pude conectar ahora. Revisa el Client ID e inténtalo de nuevo.',
+      googleLibNotReady:'Google todavía se está cargando, inténtalo de nuevo en unos segundos.'
+    },
+    week:{
+      title:'Tu semana, sin sobrecarga', dragHint:'Consejo: mantén pulsada una tarjeta de tarea y arrástrala a otro día, o usa los botones ⬅️➡️.',
+      taskPlaceholder:'Nueva tarea...', archiveBtn:'Borrar completadas', icsBtn:'Exportar .ics',
+      viewHoje:'Solo hoy', viewSemana:'Semana completa',
+      warehouseTitle:'Almacén de Ideas', warehouseDesc:'Ideas que vale la pena guardar de verdad — sin prisa para usarlas.', warehousePlaceholder:'Una idea para guardar...', moveToWarehouseLabel:'Guardar esta idea en el Almacén',
+      ideasTitle:'Papelera de Ideas', ideasDesc:'Suelta aquí pensamientos sueltos que no necesitan entrar en la semana ahora.',
+      ideaPlaceholder:'Suelta un pensamiento...', guardarBtn:'Guardar'
+    },
+    movement:{ title:'Patitas en Movimiento', desc:'¡Cualquier movimiento cuenta! 15 minutos ya es una gran victoria 🌸', streakLabel:'Días con movimiento esta semana' },
+    health:{
+      waterTitle:'Calculadora de Hidratación', pesoPlaceholder:'Peso (kg)', alturaPlaceholder:'Altura (cm)', idadePlaceholder:'Edad',
+      calcBtn:'Calcular meta', snackBtn:'Recordatorio de merienda',
+      weightTitle:'Peso e IMC — con cariño, sin juicios', logWeightBtn:'Registrar peso de hoy'
+    },
+    calm:{
+      title:'Rincón de la Calma', startBtn:'Empezar', stopBtn:'Detener',
+      soundsTitle:'Sonidos para enfocarte o relajarte', soundsDesc:'Sonidos generados al instante, sin necesidad de internet.',
+      soundHint:'El tono binaural funciona mejor con auriculares 🎧',
+      soundWaves:'🌊 Olas del Mar', soundBreeze:'🍃 Brisa Suave', soundBinaural:'🎵 Tono Binaural', soundSoft:'🌙 Toque Suave'
+    },
+    ideas:{
+      ideasTitle:'Ideas sueltas', summaryTitle:'Resumen de la semana', muralTitle:'Mural de Logros',
+      backupTitle:'Copia de seguridad', backupDesc:'Guarda una copia de tus datos o restaura una copia anterior.',
+      exportBtn:'Exportar copia', importBtn:'Importar copia'
+    },
+    cycle:{
+      configTitle:'Mi Ciclo', configDesc:'Esta información ayuda a la app a ajustar tus metas con más delicadeza.',
+      lastPeriodLabel:'Inicio de la última menstruación', periodLenLabel:'Duración de la menstruación (días)', cycleLenLabel:'Duración del ciclo (días)',
+      saveBtn:'Guardar datos del ciclo', phaseTitle:'Fase actual', dayOfCycleLabel:'Día',
+      notSetMsg:'Registra la fecha de tu última menstruación para seguir tu fase del ciclo 🌙',
+      symptomsTitle:'Síntomas de hoy', symptomsDesc:'Toca para marcar lo que sientes hoy.'
+    },
+    phases:{ menstrual:'Menstrual', folicular:'Folicular', ovulatoria:'Ovulatoria', lutea:'Lútea' },
+    gender:{ feminino:'Femenino', masculino:'Masculino', indefinido:'Prefiero no decirlo' },
+    phaseDesc:{
+      menstrual:'Fase de descanso. Vamos con calma hoy 🌙', folicular:'La energía va creciendo poco a poco 🌱',
+      ovulatoria:'Pico de energía — aprovéchalo si tiene sentido 🌸', lutea:'El cuerpo pide más cariño. Sin prisa 💜'
+    },
+    symptoms:{ colica:'Cólicos', cansaco:'Cansancio', humor:'Ánimo', foco:'Nivel de concentración', inchaco:'Hinchazón' },
+    toast:{
+      saveError:'No pude guardar ahora — revisa el espacio de almacenamiento de tu navegador 🦊',
+      mascotIntro:'¡Hola, soy {name} y te voy a acompañar por aquí! 💜',
+      colorsReset:'Colores restaurados a los predeterminados 🌸',
+      notifUnsupported:'Tu navegador no admite notificaciones, ¡pero te aviso por aquí! 🦊',
+      notifGranted:'¡Trato hecho! Te recordaré sobre el agua y tus tareas pendientes de vez en cuando 🔔',
+      notifDenied:'No hay problema, te lo recordaré aquí en la pantalla 🌸',
+      waterReminder:'¡Hora de tomar un poco de agua! 💧',
+      notifTaskReminder:'Tienes {count} tarea(s) pendiente(s) hoy. ¿Quieres echar un vistazo? 📋', notifDisabled:'Listo, dejaré de recordarte por aquí 🌸',
+      cycleNeedDate:'Elige la fecha de inicio para poder calcular tu fase 🌙',
+      cycleSaved:'¡Listo! Ajustaré tus metas con más cariño según tu fase 🌙',
+      dayFull:'¡Tarea añadida! Este día ya está bastante lleno — ¿qué tal mover algo a otro día? 🦊💤',
+      subtaskLimit:'¡Hasta 3 micropasos por tarea, para no sobrecargar! 🐾',
+      ideaSaved:'Guardé ese pensamiento con cariño, ya puedes concentrarte en el resto 🌸',
+      warehouseSaved:'Guardado en el Almacén con cariño 📦', movedToWarehouse:'Idea guardada en el Almacén, no se va a perder 📦',
+      genderChanged:'¡Listo! Ajusté la app según tu elección 🌸',
+      mascotRenamed:'¡Mucho gusto, {name}! Te llamaré así de ahora en adelante 💜',
+      exerciseLogged:'¡Genial! Cualquier movimiento es una victoria 🏅',
+      needWeight:'Necesito tu peso para calcular la meta con cariño 🌸',
+      waterGoalCalculated:'¡Meta calculada! Bebamos poco a poco, sin prisa 💧',
+      waterGoalReached:'¡Meta de agua alcanzada! Tu cuerpo lo agradece 💙',
+      snackReminder:'¿Qué tal una fruta o un tentempié ligero ahora? Ayuda a mantener tu energía 🍎',
+      invalidWeight:'No entendí ese número, ¿lo intentas de nuevo? 🌸',
+      weightThanks:'Gracias por confiarme esa información 💜',
+      noTasksWeekHelp:'No veo tareas pendientes esta semana — aprovecha para descansar 🌸',
+      chooseTask:'Empecemos con: "{task}"{suffix} 🦊 ¡Tú puedes!',
+      noTasksWeekFocus:'No hay tareas pendientes esta semana para enfocarte — respira y disfruta 🌸',
+      timeUp:'¡Se acabó el tiempo! ¿Quieres seguir un poco más? 🦊',
+      taskDoneCelebrate:'¡Excelente! Una victoria más en tu día 🎉',
+      backupExported:'¡Copia exportada! Guarda este archivo en un lugar seguro 💾',
+      backupRestored:'¡Copia restaurada con éxito! Bienvenida/o de vuelta 🌸',
+      backupBadFile:'No pude leer ese archivo — comprueba si es la copia correcta 🦊',
+      nothingToArchive:'Nada que limpiar ahora — tu semana ya está ligera 🌸',
+      archived:'Limpié {count} tarea(s) completada(s) de la semana. Siguen guardadas en el Mural de Logros 🏆',
+      noTasksToExport:'No hay tareas pendientes para exportar ahora 🌸',
+      icsExported:'¡Agenda exportada! Importa el archivo .ics en Google Calendar o Apple Calendar 📅'
+    },
+    common:{ helpChoose:'Ayúdame a elegir', focusNow:'Enfocarme ahora', mfDone:'¡Listo!', mfExit:'Salir', save:'Guardar', cancel:'Cancelar' },
+    charts:{ title:'Historial de los últimos meses', waterLabel:'Agua (ml/día)', weightLabel:'Peso (kg)', cycleLabel:'Duración de los últimos ciclos', notEnoughData:'Aún no hay suficientes días registrados 🌱', notEnoughWeight:'Registra tu peso en al menos 2 días diferentes para ver el gráfico 🌱', notEnoughCycle:'Registra el inicio de al menos 2 menstruaciones para ver la duración de los ciclos 🌙' },
+    mascotMsgs:[
+      "¡Un paso a la vez! 🐾", "Poco a poco, ¡tú puedes! 🦊",
+      "Cualquier movimiento cuenta, ¿sabías? 🌸", "Está bien ir despacio hoy 💜",
+      "Ya has hecho más de lo que imaginas hoy 🐱", "Respira hondo, nosotros nos encargamos del resto 🌿"
+    ]
+  }
+};
+function currentLocale(){ return (state && state.settings && state.settings.locale) || 'pt-BR'; }
+function t(key){
+  const dict = I18N[currentLocale()] || I18N['pt-BR'];
+  const get = (d)=> key.split('.').reduce((acc,p)=> (acc && acc[p]!==undefined) ? acc[p] : undefined, d);
+  const val = get(dict);
+  if(val!==undefined) return val;
+  const fallback = get(I18N['pt-BR']);
+  return fallback!==undefined ? fallback : key;
+}
+// Como t(), mas substitui placeholders {chave} pelos valores em params, ex: tf('toast.archived', {count:3})
+function tf(key, params){
+  let str = t(key);
+  Object.keys(params||{}).forEach(k=>{ str = str.replace(new RegExp('\\{'+k+'\\}','g'), params[k]); });
+  return str;
+}
+function applyLocale(){
+  document.documentElement.lang = currentLocale();
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  const sel = document.getElementById('localeSelect');
+  if(sel) sel.value = currentLocale();
+  const idea = document.getElementById('ideaQuickInput'); if(idea) idea.placeholder = t('week.ideaPlaceholder');
+  const warehouse = document.getElementById('warehouseQuickInput'); if(warehouse) warehouse.placeholder = t('week.warehousePlaceholder');
+  const pesoEl = document.getElementById('inPeso'); if(pesoEl) pesoEl.placeholder = t('health.pesoPlaceholder');
+  const alturaEl = document.getElementById('inAltura'); if(alturaEl) alturaEl.placeholder = t('health.alturaPlaceholder');
+  const idadeEl = document.getElementById('inIdade'); if(idadeEl) idadeEl.placeholder = t('health.idadePlaceholder');
+  const mascotNameEl = document.getElementById('mascotNameInput'); if(mascotNameEl) mascotNameEl.placeholder = t('config.mascotNamePlaceholder');
+  syncViewToggleButton();
+  renderCyclePhase();
+}
+// =================== Fim i18n ===================
+
+// ---------- Datas locais (evita bug de fuso horário do toISOString, que usa UTC) ----------
+function toLocalISODate(d){
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayISO(){ return toLocalISODate(new Date()); }
+function todayKeyPT(){
+  const map = ['dom','seg','ter','qua','qui','sex','sab'];
+  return map[new Date().getDay()];
+}
+// Segunda-feira da semana atual, com hora zerada (evita bugs de fuso/virada de mês)
+function startOfCurrentWeek(){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - ((d.getDay()+6)%7));
+  return d;
+}
+
+function defaultState(){
+  const tasks = {}; const energy = {};
+  DAYS.forEach(d=>{ tasks[d.key]=[]; energy[d.key]='media'; });
+  return {
+    theme:'lilac', ambientSound:false, ambientType:'suave',
+    settings:{ bg: PRESET_LILAC.bg, btn: PRESET_LILAC.btn, text:'#4A4159', mascot:'raposa', mascotName:'', locale:'pt-BR', gender:null, notifEnabled:false, googleClientId:'', googleAutoCalendar:false, googleDriveFileId:null },
+    profile:{peso:null, altura:null, idade:null},
+    water:{goalMl:0, currentMl:0, date: todayISO()},
+    weightHistory:[],
+    waterHistory:[],
+    exercise:{logs:[]},
+    tasks, energy,
+    ideas:[],
+    ideaWarehouse:[],
+    achievements:[],
+    lastMicroTaskId:null,
+    viewMode:'semana',
+    cycle:{ lastPeriodStart:null, periodLength:5, cycleLength:28, symptomLogs:{}, periodHistory:[] }
+  };
+}
+
+let state = defaultState();
+
+// ---------- Persistência (localStorage) ----------
+// Nota: localStorage é a API certa para um HTML standalone. Se este arquivo for aberto
+// dentro do preview embutido do Claude.ai, o sandbox do iframe pode bloquear o
+// armazenamento; abrindo o arquivo diretamente no navegador ou hospedando-o, funciona normalmente.
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ state = Object.assign(defaultState(), JSON.parse(raw)); }
+  }catch(e){ console.error('Não foi possível carregar dados salvos', e); }
+  render();
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('Não foi possível salvar', e); setMascot(t('toast.saveError')); }
+}
+
+// ---------- Modal genérico (substitui window.prompt, que trava em sandboxes) ----------
+function openModal(title, placeholder, onConfirm, initialValue){
+  const overlay = document.getElementById('modalOverlay');
+  const input = document.getElementById('modalInput');
+  const err = document.getElementById('modalError');
+  document.getElementById('modalTitle').textContent = title;
+  input.value = initialValue || ''; input.placeholder = placeholder||''; err.style.display='none';
+  overlay.classList.add('show');
+  setTimeout(()=>{ input.focus(); input.select(); }, 50);
+  function close(){ overlay.classList.remove('show'); confirmBtn.onclick=null; cancelBtn.onclick=null; input.onkeydown=null; }
+  const confirmBtn = document.getElementById('modalConfirm');
+  const cancelBtn = document.getElementById('modalCancel');
+  confirmBtn.onclick = ()=>{
+    const val = input.value.trim();
+    if(!val){ err.style.display='block'; return; }
+    close(); onConfirm(val);
+  };
+  cancelBtn.onclick = close;
+  input.onkeydown = (e)=>{
+    if(e.key==='Enter'){ e.preventDefault(); confirmBtn.click(); }
+    if(e.key==='Escape'){ e.preventDefault(); close(); }
+  };
+}
+
+function setMascot(msg, emoji){
+  document.getElementById('mascotText').textContent = msg;
+  if(emoji) document.querySelector('.mascot-bubble .emoji').textContent = emoji;
+}
+function randomMascot(){
+  const msgs = t('mascotMsgs');
+  setMascot(msgs[Math.floor(Math.random()*msgs.length)], mascotEmoji());
+}
+
+// ---------- Confetti ----------
+function celebrate(emojis, useFanfare){
+  emojis = emojis || ['✨','🌸','💜','⭐','🐾'];
+  for(let i=0;i<18;i++){
+    const el = document.createElement('div');
+    el.className='confetti-piece';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = Math.random()*100+'vw';
+    el.style.animationDuration = (2+Math.random()*1.5)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+  if(useFanfare) playFanfare(); else playChime();
+}
+function playChime(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type='sine'; o.frequency.value=880;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+1.2);
+    o.start(); o.stop(ctx.currentTime+1.2);
+    setTimeout(()=>ctx.close(), 1300);
+  }catch(e){}
+}
+// Fanfarra de vitória tocada ao concluir uma tarefa: uma composição própria e alegre
+// (arpejo maior ascendente + acorde final), sem reproduzir nenhuma música existente.
+let fanfareCtx = null;
+function playFanfare(){
+  try{
+    if(fanfareCtx){ try{ fanfareCtx.close(); }catch(e){} }
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    fanfareCtx = ctx;
+    const now = ctx.currentTime;
+    function playNote(freq, start, dur, type, peak){
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = type; o.frequency.value = freq;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(peak, start+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+      o.start(start); o.stop(start+dur+0.02);
+    }
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // Dó-Mi-Sol-Dó (C5-E5-G5-C6)
+    let t = now;
+    notes.forEach(f=>{ playNote(f, t, 0.16, 'triangle', 0.16); t += 0.145; });
+    t += 0.06;
+    notes.forEach(f=>{ playNote(f, t, 0.14, 'triangle', 0.19); t += 0.115; });
+    t += 0.05;
+    // acorde final sustentado e brilhante
+    [1046.50, 1318.51, 1567.98].forEach(f=> playNote(f, t, 1.3, 'sawtooth', 0.08));
+    const totalMs = (t - now + 1.4) * 1000;
+    setTimeout(()=>{ try{ ctx.close(); }catch(e){} if(fanfareCtx===ctx) fanfareCtx=null; }, totalMs);
+  }catch(e){}
+}
+
+// ---------- Sons ambiente: Marrom, Rosa e Tom Binaural (Web Audio API) ----------
+let ambientCtx=null, ambientNodes=[];
+function makeBrownNoiseBuffer(ctx){
+  const bufferSize = 2*ctx.sampleRate;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  let lastOut=0;
+  for(let i=0;i<bufferSize;i++){
+    const white = Math.random()*2-1;
+    data[i] = (lastOut + (0.02*white))/1.02; lastOut = data[i]; data[i]*=3.5;
+  }
+  return buffer;
+}
+function makePinkNoiseBuffer(ctx){
+  const bufferSize = 2*ctx.sampleRate;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+  for(let i=0;i<bufferSize;i++){
+    const white = Math.random()*2-1;
+    b0 = 0.99886*b0 + white*0.0555179;
+    b1 = 0.99332*b1 + white*0.0750759;
+    b2 = 0.96900*b2 + white*0.1538520;
+    b3 = 0.86650*b3 + white*0.3104856;
+    b4 = 0.55000*b4 + white*0.5329522;
+    b5 = -0.7616*b5 - white*0.0168980;
+    const pink = b0+b1+b2+b3+b4+b5+b6+white*0.5362;
+    b6 = white*0.115926;
+    data[i] = pink*0.11;
+  }
+  return buffer;
+}
+function stopAmbientSound(){
+  ambientNodes.forEach(n=>{ try{ n.stop ? n.stop() : null; }catch(e){} });
+  ambientNodes = [];
+  if(ambientCtx){ try{ ambientCtx.close(); }catch(e){} ambientCtx=null; }
+}
+function playAmbientSound(type){
+  stopAmbientSound();
+  ambientCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const masterGain = ambientCtx.createGain();
+  masterGain.connect(ambientCtx.destination);
+
+  if(type==='marrom' || type==='rosa'){
+    const buffer = type==='marrom' ? makeBrownNoiseBuffer(ambientCtx) : makePinkNoiseBuffer(ambientCtx);
+    const src = ambientCtx.createBufferSource();
+    src.buffer = buffer; src.loop = true;
+
+    // Filtro passa-baixa: corta o "chiado" agudo que incomoda, deixando só o som grave e suave
+    const filter = ambientCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = type==='marrom' ? 550 : 420;
+    filter.Q.value = 0.5;
+
+    // Ondulação lenta de volume: simula ondas do mar (marrom) ou brisa (rosa) em vez de um ruído fixo
+    const waveGain = ambientCtx.createGain();
+    const lfo = ambientCtx.createOscillator();
+    const lfoGain = ambientCtx.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.value = type==='marrom' ? 0.09 : 0.06;
+    lfoGain.gain.value = type==='marrom' ? 0.35 : 0.22;
+    waveGain.gain.value = type==='marrom' ? 0.85 : 0.65;
+    lfo.connect(lfoGain); lfoGain.connect(waveGain.gain);
+    lfo.start();
+
+    masterGain.gain.value = 0.05;
+    src.connect(filter); filter.connect(waveGain); waveGain.connect(masterGain);
+    src.start();
+    ambientNodes = [src, lfo];
+  } else if(type==='suave'){
+    // Toque Suave: só notas puras sustentadas, sem nenhum ruído/chiado — pra quem acha
+    // os sons de ruído (Ondas do Mar / Brisa Suave) irritantes.
+    masterGain.gain.value = 0.05;
+    const filter = ambientCtx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.value = 900; filter.Q.value = 0.3;
+    filter.connect(masterGain);
+    const freqs = [130.81, 164.81, 196.00, 261.63]; // Dó3-Mi3-Sol3-Dó4: acorde maior bem aberto e suave
+    const nodes = [];
+    freqs.forEach((f,i)=>{
+      const o = ambientCtx.createOscillator();
+      o.type = 'sine'; o.frequency.value = f;
+      const g = ambientCtx.createGain();
+      g.gain.value = 0.22 - i*0.02;
+      // "respiração" bem lenta e suave no volume de cada nota, em ritmos levemente diferentes
+      const lfo = ambientCtx.createOscillator();
+      const lfoGain = ambientCtx.createGain();
+      lfo.type = 'sine'; lfo.frequency.value = 0.05 + i*0.015;
+      lfoGain.gain.value = g.gain.value * 0.4;
+      lfo.connect(lfoGain); lfoGain.connect(g.gain);
+      o.connect(g); g.connect(filter);
+      lfo.start(); o.start();
+      nodes.push(o, lfo);
+    });
+    ambientNodes = nodes;
+  } else if(type==='binaural'){
+    masterGain.gain.value = 0.06;
+    const oscL = ambientCtx.createOscillator(); oscL.type='sine'; oscL.frequency.value=200;
+    const oscR = ambientCtx.createOscillator(); oscR.type='sine'; oscR.frequency.value=206; // batimento de 6Hz, bem leve
+    const panL = ambientCtx.createStereoPanner ? ambientCtx.createStereoPanner() : null;
+    const panR = ambientCtx.createStereoPanner ? ambientCtx.createStereoPanner() : null;
+    if(panL && panR){
+      panL.pan.value=-1; panR.pan.value=1;
+      oscL.connect(panL).connect(masterGain);
+      oscR.connect(panR).connect(masterGain);
+    } else {
+      oscL.connect(masterGain); oscR.connect(masterGain);
+    }
+    oscL.start(); oscR.start();
+    ambientNodes = [oscL, oscR];
+  }
+}
+function setAmbientButtonsState(activeType){
+  document.querySelectorAll('.sound-btn').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.sound===activeType));
+  });
+}
+document.querySelectorAll('.sound-btn').forEach(b=>{
+  b.onclick = ()=>{
+    const type = b.dataset.sound;
+    if(state.ambientSound && state.ambientType===type){
+      stopAmbientSound();
+      state.ambientSound=false;
+      setAmbientButtonsState(null);
+    } else {
+      playAmbientSound(type);
+      state.ambientSound=true; state.ambientType=type;
+      setAmbientButtonsState(type);
+    }
+    document.getElementById('soundBtn').textContent = state.ambientSound ? '🔊' : '🔇';
+    document.getElementById('soundBtn').setAttribute('aria-pressed', String(state.ambientSound));
+    saveState();
+  };
+});
+
+// ---------- Cores customizáveis (fundo, botões, letras) ----------
+function applyCustomColors(){
+  document.documentElement.style.setProperty('--bg', state.settings.bg);
+  document.documentElement.style.setProperty('--accent', state.settings.btn);
+  document.documentElement.style.setProperty('--ink', state.settings.text);
+}
+function applyMascotUI(){
+  const emoji = mascotEmoji();
+  const name = mascotDisplayName();
+  const headerEl = document.getElementById('headerMascotEmoji');
+  if(headerEl){ headerEl.textContent = emoji; headerEl.title = name; headerEl.setAttribute('aria-label', name); }
+  const bubbleEmoji = document.querySelector('.mascot-bubble .emoji');
+  if(bubbleEmoji){ bubbleEmoji.textContent = emoji; bubbleEmoji.title = name; }
+  const nameInput = document.getElementById('mascotNameInput');
+  if(nameInput && document.activeElement!==nameInput) nameInput.value = state.settings.mascotName || '';
+  document.querySelectorAll('.mascot-icon-slot').forEach(el=>{ el.textContent = emoji; });
+  updateFavicon();
+  applyPawIcons();
+}
+function renderSettingsPanel(){
+  renderGoogleUI();
+  const bgEl = document.getElementById('bgSwatches');
+  const btnEl = document.getElementById('btnSwatches');
+  const textEl = document.getElementById('textSwatches');
+  bgEl.innerHTML=''; btnEl.innerHTML=''; textEl.innerHTML='';
+
+  LIGHT_SWATCHES.forEach(s=>{
+    const b = document.createElement('button');
+    b.className='swatch'; b.style.background=s.value;
+    b.setAttribute('aria-label','Fundo '+s.name);
+    b.setAttribute('aria-pressed', String(state.settings.bg===s.value));
+    b.onclick = ()=>{ state.settings.bg = s.value; applyCustomColors(); renderSettingsPanel(); saveState(); };
+    bgEl.appendChild(b);
+  });
+  LIGHT_SWATCHES.forEach(s=>{
+    const b = document.createElement('button');
+    b.className='swatch'; b.style.background=s.value;
+    b.setAttribute('aria-label','Botões '+s.name);
+    b.setAttribute('aria-pressed', String(state.settings.btn===s.value));
+    b.onclick = ()=>{ state.settings.btn = s.value; applyCustomColors(); renderSettingsPanel(); saveState(); };
+    btnEl.appendChild(b);
+  });
+  DARK_TEXT_SWATCHES.forEach(s=>{
+    const b = document.createElement('button');
+    b.className='swatch'; b.style.background=s.value;
+    b.setAttribute('aria-label','Letras '+s.name);
+    b.setAttribute('aria-pressed', String(state.settings.text===s.value));
+    b.onclick = ()=>{ state.settings.text = s.value; applyCustomColors(); renderSettingsPanel(); saveState(); };
+    textEl.appendChild(b);
+  });
+
+  const mascotEl = document.getElementById('mascotGrid');
+  mascotEl.innerHTML='';
+  MASCOTS.forEach(m=>{
+    const b = document.createElement('button');
+    b.className='mascot-btn';
+    b.setAttribute('aria-pressed', String(state.settings.mascot===m.key));
+    b.setAttribute('aria-label','Escolher '+m.name+' como mascote');
+    b.innerHTML = `${m.emoji}<span class="name">${m.name}</span>`;
+    b.onclick = ()=>{
+      state.settings.mascot = m.key;
+      applyMascotUI(); renderSettingsPanel(); renderWeek(); saveState();
+      setMascot(tf('toast.mascotIntro', {name: mascotDisplayName().toLowerCase()}), m.emoji);
+    };
+    mascotEl.appendChild(b);
+  });
+
+  const nameInput = document.getElementById('mascotNameInput');
+  nameInput.placeholder = t('config.mascotNamePlaceholder');
+  if(document.activeElement!==nameInput) nameInput.value = state.settings.mascotName || '';
+  function saveMascotName(){
+    const val = nameInput.value.trim();
+    if(val === (state.settings.mascotName||'')) return;
+    state.settings.mascotName = val;
+    saveState(); applyMascotUI();
+    if(val) setMascot(tf('toast.mascotRenamed', {name: val}), mascotEmoji());
+  }
+  nameInput.onblur = saveMascotName;
+  nameInput.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); nameInput.blur(); } };
+
+  const genderEl = document.getElementById('genderGrid');
+  genderEl.innerHTML='';
+  GENDER_OPTIONS.forEach(g=>{
+    const b = document.createElement('button');
+    b.className='mascot-btn';
+    b.setAttribute('aria-pressed', String(state.settings.gender===g.key));
+    b.setAttribute('aria-label', t('gender.'+g.key));
+    b.innerHTML = `${g.emoji}<span class="name">${t('gender.'+g.key)}</span>`;
+    b.onclick = ()=>{
+      state.settings.gender = g.key;
+      if(g.key==='masculino'){ state.settings.bg = PRESET_BOLD.bg; state.settings.btn = PRESET_BOLD.btn; }
+      else if(g.key==='feminino'){ state.settings.bg = PRESET_CUTE.bg; state.settings.btn = PRESET_CUTE.btn; }
+      else { state.settings.bg = PRESET_LILAC.bg; state.settings.btn = PRESET_LILAC.btn; }
+      updateCycleTabVisibility();
+      applyGenderStyle();
+      applyCustomColors(); applyTheme(); renderSettingsPanel(); renderWeek(); renderWater(); saveState();
+      setMascot(t('toast.genderChanged'), mascotEmoji());
+    };
+    genderEl.appendChild(b);
+  });
+}
+// Mostra ou esconde a aba Ciclo conforme o gênero escolhido, e tira o usuário de lá
+// caso ela esteja aberta no momento em que for escondida.
+function updateCycleTabVisibility(){
+  const hide = state.settings.gender==='masculino';
+  const navBtn = document.querySelector('nav.tabs button[data-tab="ciclo"]');
+  const section = document.getElementById('tab-ciclo');
+  if(navBtn) navBtn.style.display = hide ? 'none' : '';
+  if(hide && section && section.classList.contains('active')){
+    activateTab('semana');
+  }
+}
+// Ajusta pequenos detalhes visuais conforme o gênero: cantos mais arredondados e um
+// toque de brilho no feminino ("mais fofo"); cantos um pouco mais estruturados no masculino.
+function applyGenderStyle(){
+  document.body.classList.remove('gender-fem', 'gender-masc');
+  const accent = document.getElementById('genderAccent');
+  if(state.settings.gender==='feminino'){
+    document.body.classList.add('gender-fem');
+    if(accent) accent.textContent = '✨';
+  } else if(state.settings.gender==='masculino'){
+    document.body.classList.add('gender-masc');
+    if(accent) accent.textContent = '⚡';
+  } else if(accent){
+    accent.textContent = '';
+  }
+}
+document.getElementById('resetColorsBtn').onclick = ()=>{
+  const d = defaultState();
+  state.settings.bg = d.settings.bg; state.settings.btn = d.settings.btn; state.settings.text = d.settings.text;
+  delete state.settings._preSunsetBg; delete state.settings._preSunsetBtn;
+  applyCustomColors(); applyTheme(); renderSettingsPanel(); saveState();
+  setMascot(t('toast.colorsReset'));
+};
+
+// ---------- Tema rápido (atalho no cabeçalho: alterna para "Pôr do Sol" e volta para a cor de antes) ----------
+function toggleTheme(){
+  const isPeachNow = state.settings.bg === PRESET_PEACH.bg && state.settings.btn === PRESET_PEACH.btn;
+  if(isPeachNow){
+    // Volta exatamente para a cor personalizada que estava em uso antes do atalho
+    state.settings.bg = state.settings._preSunsetBg || PRESET_LILAC.bg;
+    state.settings.btn = state.settings._preSunsetBtn || PRESET_LILAC.btn;
+  } else {
+    state.settings._preSunsetBg = state.settings.bg;
+    state.settings._preSunsetBtn = state.settings.btn;
+    state.settings.bg = PRESET_PEACH.bg;
+    state.settings.btn = PRESET_PEACH.btn;
+  }
+  applyCustomColors(); renderSettingsPanel(); applyTheme(); saveState();
+}
+function applyTheme(){
+  const isPeach = state.settings.bg === PRESET_PEACH.bg && state.settings.btn === PRESET_PEACH.btn;
+  document.getElementById('themeBtn').textContent = isPeach ? '🌙' : '🌇';
+  document.getElementById('themeBtn').setAttribute('aria-pressed', String(isPeach));
+}
+
+// ---------- Notificações ----------
+// ---------- Notificações: água + tarefas pendentes do dia ----------
+// Limitação importante: como é um arquivo único sem servidor/service worker, essas notificações
+// só disparam enquanto a aba do app estiver aberta no navegador (não funciona com o app fechado).
+const REMINDER_INTERVAL_MS = 90*60*1000; // a cada 90 min, para não ficar naggy
+let reminderTimer=null;
+function syncNotifButton(){
+  const btn = document.getElementById('notifBtn');
+  if(!btn) return;
+  btn.textContent = state.settings.notifEnabled ? '🔔' : '🔕';
+  btn.setAttribute('aria-pressed', String(state.settings.notifEnabled));
+}
+function requestNotif(){
+  if(!('Notification' in window)){ setMascot(t('toast.notifUnsupported')); return; }
+  if(state.settings.notifEnabled){
+    state.settings.notifEnabled = false;
+    stopReminders(); syncNotifButton(); saveState();
+    setMascot(t('toast.notifDisabled'), mascotEmoji());
+    return;
+  }
+  if(Notification.permission==='granted'){
+    state.settings.notifEnabled = true;
+    startReminders(); syncNotifButton(); saveState();
+    setMascot(t('toast.notifGranted'), mascotEmoji());
+  } else if(Notification.permission==='denied'){
+    setMascot(t('toast.notifDenied'), mascotEmoji());
+  } else {
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){
+        state.settings.notifEnabled = true;
+        startReminders(); syncNotifButton(); saveState();
+        setMascot(t('toast.notifGranted'), mascotEmoji());
+      } else {
+        setMascot(t('toast.notifDenied'), mascotEmoji());
+      }
+    });
+  }
+}
+function startReminders(){
+  stopReminders();
+  reminderTimer = setInterval(checkAndNotify, REMINDER_INTERVAL_MS);
+}
+function stopReminders(){
+  if(reminderTimer){ clearInterval(reminderTimer); reminderTimer=null; }
+}
+function sendReminderNotification(body){
+  if(Notification.permission==='granted'){
+    try{
+      const n = new Notification(`${mascotEmoji()} ${mascotDisplayName()}`, {body});
+      n.onclick = ()=>{ window.focus(); n.close(); };
+    }catch(e){ console.error('Não foi possível notificar', e); }
+  } else {
+    setMascot(body, mascotEmoji());
+  }
+}
+// Verifica o que ainda falta fazer e manda no máximo 1 lembrete gentil por vez
+// (água tem prioridade; se a meta já foi batida, lembra das tarefas pendentes de hoje).
+function checkAndNotify(){
+  if(!state.settings.notifEnabled) return;
+  const hour = new Date().getHours();
+  if(hour < 8 || hour >= 22) return; // não incomoda de madrugada
+  checkNewDay();
+  if(state.water.goalMl>0 && state.water.currentMl < state.water.goalMl){
+    sendReminderNotification(t('toast.waterReminder'));
+    return;
+  }
+  const todayTasks = state.tasks[todayKeyPT()] || [];
+  const pending = todayTasks.filter(x=>!x.done).length;
+  if(pending>0){
+    sendReminderNotification(tf('toast.notifTaskReminder', {count: pending}));
+  }
+}
+
+// ---------- Abas ----------
+let lastNonConfigTab = 'semana';
+function activateTab(tabKey){
+  document.querySelectorAll('nav.tabs button').forEach(b=>{
+    const isMatch = b.dataset.tab===tabKey;
+    b.classList.toggle('active', isMatch);
+    b.setAttribute('aria-selected', String(isMatch));
+  });
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tabKey).classList.add('active');
+  if(tabKey!=='config') lastNonConfigTab = tabKey;
+}
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=> activateTab(btn.dataset.tab));
+});
+document.getElementById('closeConfigBtn').onclick = ()=> activateTab(lastNonConfigTab);
+document.getElementById('tabsScrollLeft').onclick = ()=>{
+  document.querySelector('nav.tabs').scrollBy({left:-140, behavior:'smooth'});
+};
+document.getElementById('tabsScrollRight').onclick = ()=>{
+  document.querySelector('nav.tabs').scrollBy({left:140, behavior:'smooth'});
+};
+
+// ---------- Semana / tarefas ----------
+// =================== Ciclo Menstrual ===================
+// Modelo simplificado de 4 fases a partir da data de início da última menstruação:
+// Menstrual (dias 0..periodLength-1) -> Folicular -> Ovulatória (janela de 3 dias em torno
+// do dia cycleLength-14) -> Lútea (até o fim do ciclo). É uma aproximação de bem-estar,
+// não um método contraceptivo nem diagnóstico clínico.
+function getCyclePhaseInfo(dateObj){
+  const c = state.cycle;
+  if(!c || !c.lastPeriodStart) return null;
+  const start = new Date(c.lastPeriodStart+'T00:00:00');
+  const target = new Date(dateObj); target.setHours(0,0,0,0);
+  const cycleLen = c.cycleLength || 28;
+  const periodLen = Math.min(c.periodLength || 5, cycleLen-1);
+  const diffDays = Math.floor((target-start)/86400000);
+  let dayInCycle = diffDays % cycleLen;
+  if(dayInCycle < 0) dayInCycle += cycleLen;
+  const ovulationDay = Math.max(periodLen, cycleLen-14);
+  let phase;
+  if(dayInCycle < periodLen) phase='menstrual';
+  else if(dayInCycle < ovulationDay-1) phase='folicular';
+  else if(dayInCycle <= ovulationDay+1) phase='ovulatoria';
+  else phase='lutea';
+  return { phase, dayInCycle: dayInCycle+1, cycleLen };
+}
+function todaysCyclePhase(){
+  if(state.settings.gender==='masculino') return null;
+  return getCyclePhaseInfo(new Date());
+}
+
+// Ajusta o limite de tarefas por energia: nas fases Menstrual e Lútea, reduz em 1
+// (mínimo 1), para pedir menos do corpo nos dias em que ele já está pedindo mais gentileza.
+function energyLimit(level){
+  let base = level==='baixa' ? 2 : (level==='alta' ? 5 : 4);
+  const info = todaysCyclePhase();
+  if(info && (info.phase==='menstrual' || info.phase==='lutea')) base = Math.max(1, base-1);
+  return base;
+}
+// Ajusta a meta de água: um pouco mais gentil (-10%) nas fases Menstrual e Lútea.
+function cycleWaterAdjustment(){
+  const info = todaysCyclePhase();
+  return (info && (info.phase==='menstrual' || info.phase==='lutea')) ? 0.9 : 1;
+}
+
+const SYMPTOM_KEYS = ['colica','cansaco','humor','foco','inchaco'];
+function renderCyclePhase(){
+  const phaseCard = document.getElementById('cyclePhaseCard');
+  const sympCard = document.getElementById('cycleSymptomsCard');
+  const badge = document.getElementById('cyclePhaseBadge');
+  const info = todaysCyclePhase();
+  renderCycleChart();
+
+  if(!info){
+    phaseCard.style.display='none'; sympCard.style.display='none';
+    badge.hidden = true;
+    return;
+  }
+  phaseCard.style.display='block'; sympCard.style.display='block';
+  const phaseName = t('phases.'+info.phase);
+  const phaseMsg = t('phaseDesc.'+info.phase);
+  document.getElementById('cyclePhaseDisplay').innerHTML = `
+    <div class="phase-pill">🌙 ${phaseName} <span class="phase-day">${t('cycle.dayOfCycleLabel')} ${info.dayInCycle}/${info.cycleLen}</span></div>
+    <div style="font-size:0.85rem;color:var(--ink-soft);">${phaseMsg}</div>
+  `;
+  badge.hidden = false;
+  badge.innerHTML = `🌙 ${phaseName} · ${t('cycle.dayOfCycleLabel')} ${info.dayInCycle}/${info.cycleLen}`;
+
+  const symEl = document.getElementById('symptomButtons');
+  symEl.innerHTML='';
+  const today = todayISO();
+  const todayLogs = (state.cycle.symptomLogs && state.cycle.symptomLogs[today]) || [];
+  SYMPTOM_KEYS.forEach(key=>{
+    const b = document.createElement('button');
+    b.className='symptom-btn';
+    b.textContent = t('symptoms.'+key);
+    const on = todayLogs.includes(key);
+    b.setAttribute('aria-pressed', String(on));
+    b.onclick = ()=>{
+      if(!state.cycle.symptomLogs[today]) state.cycle.symptomLogs[today] = [];
+      const list = state.cycle.symptomLogs[today];
+      const idx = list.indexOf(key);
+      if(idx>=0) list.splice(idx,1); else list.push(key);
+      saveState(); renderCyclePhase();
+    };
+    symEl.appendChild(b);
+  });
+}
+document.getElementById('cycleLastPeriod').onchange = ()=>{}; // valor só é lido no salvar, para permitir digitar sem recalcular a cada tecla
+document.getElementById('cycleSaveBtn').onclick = ()=>{
+  const dateVal = document.getElementById('cycleLastPeriod').value;
+  const periodLen = parseInt(document.getElementById('cyclePeriodLen').value) || 5;
+  const cycleLen = parseInt(document.getElementById('cycleLen').value) || 28;
+  if(!dateVal){ setMascot(t('toast.cycleNeedDate'), mascotEmoji()); return; }
+  state.cycle.lastPeriodStart = dateVal;
+  state.cycle.periodLength = periodLen;
+  state.cycle.cycleLength = cycleLen;
+  if(!state.cycle.periodHistory) state.cycle.periodHistory = [];
+  if(!state.cycle.periodHistory.some(p=>p.date===dateVal)){
+    state.cycle.periodHistory.push({date: dateVal});
+    state.cycle.periodHistory.sort((a,b)=> a.date.localeCompare(b.date));
+  }
+  saveState(); renderCyclePhase(); renderWeek(); renderWater(); renderCycleChart();
+  setMascot(t('toast.cycleSaved'), mascotEmoji());
+};
+function fillCycleInputs(){
+  const c = state.cycle;
+  document.getElementById('cycleLastPeriod').value = c.lastPeriodStart || '';
+  document.getElementById('cyclePeriodLen').value = c.periodLength || 5;
+  document.getElementById('cycleLen').value = c.cycleLength || 28;
+}
+// =================== Fim Ciclo Menstrual ===================
+
+// ---------- Seletor de idioma ----------
+document.getElementById('localeSelect').onchange = (e)=>{
+  state.settings.locale = e.target.value;
+  saveState(); applyLocale(); renderSettingsPanel(); renderWeek();
+};
+
+function renderWeek(){
+  const container = document.getElementById('weekContainer');
+  container.innerHTML='';
+  const todayKey = todayKeyPT();
+  const daysToShow = state.viewMode==='hoje' ? DAYS.filter(d=>d.key===todayKey) : DAYS;
+  daysToShow.forEach((d)=>{
+    const idx = DAYS.findIndex(x=>x.key===d.key);
+    const dayTasks = state.tasks[d.key];
+    const limit = energyLimit(state.energy[d.key]);
+    const activeCount = dayTasks.filter(t=>!t.done).length;
+    const full = activeCount >= limit;
+
+    const col = document.createElement('div');
+    col.className='day-col';
+    col.innerHTML = `
+      <div class="day-head">
+        <span class="name">${d.name}${d.key===todayKey ? ` <span class="day-paw-icon" aria-hidden="true">${pawIconSVG()}</span>` : ''}</span>
+        <div class="energy-select" data-day="${d.key}" role="group" aria-label="Nível de energia de ${d.name}">
+          <button data-e="baixa" aria-pressed="${state.energy[d.key]==='baixa'}" aria-label="Energia baixa, ${d.name}">${mascotEmoji()}💤</button>
+          <button data-e="media" aria-pressed="${state.energy[d.key]==='media'}" aria-label="Energia média, ${d.name}">${mascotEmoji()}🌿</button>
+          <button data-e="alta" aria-pressed="${state.energy[d.key]==='alta'}" aria-label="Energia alta, ${d.name}">${mascotEmoji()}⚡</button>
+        </div>
+      </div>
+      <div class="limit-note ${full?'full':''}">${activeCount}/${limit} tarefas ${full?`— dia bem cheio, que tal mover algo para outro dia? ${mascotEmoji()}💤`:''}</div>
+      <div class="task-list" data-day="${d.key}"></div>
+      <div class="add-task-row">
+        <input type="text" class="new-task-input" data-day="${d.key}" placeholder="${t('week.taskPlaceholder')}" aria-label="Nova tarefa para ${d.name}">
+        <select class="new-task-tag" data-day="${d.key}" aria-label="Categoria da tarefa">
+          ${TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}
+        </select>
+        <button class="btn small add-task-btn" data-day="${d.key}" aria-label="Adicionar tarefa em ${d.name}">+</button>
+      </div>
+    `;
+    container.appendChild(col);
+
+    const list = col.querySelector('.task-list');
+    dayTasks.forEach(task=>{
+      const el = document.createElement('div');
+      el.className = 'task' + (task.done ? ' done' : '');
+      el.dataset.day = d.key; el.dataset.id = task.id;
+      el.innerHTML = `
+        <div class="task-top">
+          <span class="drag-handle" aria-hidden="true">⠿</span>
+          <input type="checkbox" ${task.done?'checked':''} data-day="${d.key}" data-id="${task.id}" class="task-check" aria-label="Concluir tarefa: ${escapeHtml(task.text)}">
+          <span class="task-text">${escapeHtml(task.text)}</span>
+          <span class="tag">${task.tag}</span>
+        </div>
+        <div class="task-actions">
+          ${idx>0?`<button class="mini-btn move-btn" data-dir="-1" data-day="${d.key}" data-id="${task.id}" aria-label="Mover tarefa para o dia anterior">⬅️</button>`:''}
+          ${idx<DAYS.length-1?`<button class="mini-btn move-btn" data-dir="1" data-day="${d.key}" data-id="${task.id}" aria-label="Mover tarefa para o próximo dia">➡️</button>`:''}
+          <button class="mini-btn edit-btn" data-day="${d.key}" data-id="${task.id}" aria-label="Editar texto da tarefa">✏️</button>
+          <button class="mini-btn subtask-btn" data-day="${d.key}" data-id="${task.id}" aria-label="Adicionar micro-passo">➕ passo</button>
+          <button class="mini-btn del-btn" data-day="${d.key}" data-id="${task.id}" aria-label="Excluir tarefa">🗑️</button>
+        </div>
+        ${task.subtasks && task.subtasks.length ? `<div class="subtasks">${task.subtasks.map((s,si)=>`
+          <label><input type="checkbox" ${s.done?'checked':''} class="sub-check" data-day="${d.key}" data-id="${task.id}" data-si="${si}"> ${escapeHtml(s.text)}</label>
+        `).join('')}</div>` : ''}
+      `;
+      list.appendChild(el);
+      wireTaskDrag(el, d.key, task.id);
+    });
+  });
+  wireWeekEvents();
+  wireEnterKeySubmission();
+  updateThreePaws();
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ---------- Arrastar e soltar (Pointer Events: funciona com mouse e touch) ----------
+function moveTaskToDay(fromDay, taskId, toDay){
+  if(fromDay===toDay) return;
+  const list = state.tasks[fromDay];
+  const ti = list.findIndex(t=>t.id===taskId);
+  if(ti<0) return;
+  const [task] = list.splice(ti,1);
+  state.tasks[toDay].push(task);
+  saveState(); renderWeek();
+}
+// Amplia a área de soltura para o dia inteiro (day-col), não só a .task-list,
+// que pode ficar minúscula (ou até com altura zero) quando o dia está vazio.
+function findDropList(el){
+  if(!el) return null;
+  const directList = el.closest('.task-list');
+  if(directList) return directList;
+  const col = el.closest('.day-col');
+  return col ? col.querySelector('.task-list') : null;
+}
+function wireTaskDrag(taskEl, day, taskId){
+  taskEl.addEventListener('pointerdown', (e)=>{
+    if(e.target.closest('button, input, .task-actions, .subtasks')) return;
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    const startX = e.clientX, startY = e.clientY;
+    let dragging = false;
+    const pointerId = e.pointerId;
+
+    function onMove(ev){
+      const dx = ev.clientX-startX, dy = ev.clientY-startY;
+      if(!dragging && Math.hypot(dx,dy) > 8){
+        dragging = true;
+        taskEl.classList.add('dragging');
+        try{ taskEl.setPointerCapture(pointerId); }catch(err){}
+      }
+      if(dragging){
+        ev.preventDefault();
+        taskEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        document.querySelectorAll('.task-list.drag-over').forEach(c=>c.classList.remove('drag-over'));
+        taskEl.style.pointerEvents='none';
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        taskEl.style.pointerEvents='';
+        const col = findDropList(under);
+        if(col) col.classList.add('drag-over');
+      }
+    }
+    function onUp(ev){
+      taskEl.removeEventListener('pointermove', onMove);
+      taskEl.removeEventListener('pointerup', onUp);
+      taskEl.removeEventListener('pointercancel', onUp);
+      try{ taskEl.releasePointerCapture(pointerId); }catch(err){}
+      document.querySelectorAll('.task-list.drag-over').forEach(c=>c.classList.remove('drag-over'));
+      if(dragging){
+        taskEl.classList.remove('dragging');
+        taskEl.style.transform='';
+        taskEl.style.pointerEvents='none';
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        taskEl.style.pointerEvents='';
+        const col = findDropList(under);
+        if(col && col.dataset.day){
+          moveTaskToDay(day, taskId, col.dataset.day);
+        }
+      }
+    }
+    taskEl.addEventListener('pointermove', onMove);
+    taskEl.addEventListener('pointerup', onUp);
+    taskEl.addEventListener('pointercancel', onUp);
+  });
+}
+
+// ---------- Enviar com Enter nos campos de nova tarefa e ideia ----------
+function wireEnterKeySubmission(){
+  document.querySelectorAll('.new-task-input').forEach(input=>{
+    input.onkeydown = (e)=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const day = input.dataset.day;
+        document.querySelector(`.add-task-btn[data-day="${day}"]`).click();
+      }
+    };
+  });
+}
+
+function wireWeekEvents(){
+  document.querySelectorAll('.energy-select button').forEach(b=>{
+    b.onclick = ()=>{
+      const day = b.parentElement.dataset.day;
+      state.energy[day] = b.dataset.e;
+      saveState(); renderWeek();
+    };
+  });
+  document.querySelectorAll('.add-task-btn').forEach(b=>{
+    b.onclick = ()=>{
+      const day = b.dataset.day;
+      const input = document.querySelector(`.new-task-input[data-day="${day}"]`);
+      const tagSel = document.querySelector(`.new-task-tag[data-day="${day}"]`);
+      const text = input.value.trim();
+      if(!text) return;
+      const activeCount = state.tasks[day].filter(t=>!t.done).length;
+      const limit = energyLimit(state.energy[day]);
+      const newTask = {id: 't'+Date.now()+Math.random().toString(36).slice(2,6), text, tag: tagSel.value, done:false, subtasks:[]};
+      state.tasks[day].push(newTask);
+      input.value='';
+      saveState(); renderWeek();
+      if(state.settings.googleAutoCalendar && googleAccessToken){
+        syncOneTaskToGoogleCalendar(newTask, day);
+      }
+      if(activeCount+1 >= limit){
+        setMascot(t('toast.dayFull'));
+      }
+      document.querySelector(`.new-task-input[data-day="${day}"]`).focus();
+    };
+  });
+  document.querySelectorAll('.task-check').forEach(c=>{
+    c.onchange = ()=>{
+      const day=c.dataset.day, id=c.dataset.id;
+      const task = state.tasks[day].find(t=>t.id===id);
+      task.done = c.checked;
+      if(task.done){
+        celebrate(['✨','🌸','💜','⭐','🐾'], true); randomMascot();
+        const already = state.achievements.some(a=>a.type==='tarefa' && a.taskId===id && a.date===todayISO());
+        if(!already) state.achievements.push({type:'tarefa', text:task.text, date:todayISO(), taskId:id});
+      } else {
+        state.achievements = state.achievements.filter(a=>!(a.type==='tarefa' && a.taskId===id && a.date===todayISO()));
+      }
+      saveState(); renderWeek();
+    };
+  });
+  document.querySelectorAll('.sub-check').forEach(c=>{
+    c.onchange = ()=>{
+      const day=c.dataset.day, id=c.dataset.id, si=+c.dataset.si;
+      const task = state.tasks[day].find(t=>t.id===id);
+      task.subtasks[si].done = c.checked;
+      saveState(); renderWeek();
+    };
+  });
+  document.querySelectorAll('.move-btn').forEach(b=>{
+    b.onclick = ()=>{
+      const day=b.dataset.day, id=b.dataset.id, dir=+b.dataset.dir;
+      const idx = DAYS.findIndex(d=>d.key===day);
+      const newIdx = idx+dir;
+      if(newIdx<0 || newIdx>=DAYS.length) return;
+      moveTaskToDay(day, id, DAYS[newIdx].key);
+    };
+  });
+  document.querySelectorAll('.del-btn').forEach(b=>{
+    b.onclick = ()=>{
+      const day=b.dataset.day, id=b.dataset.id;
+      state.tasks[day] = state.tasks[day].filter(t=>t.id!==id);
+      saveState(); renderWeek();
+    };
+  });
+  document.querySelectorAll('.edit-btn').forEach(b=>{
+    b.onclick = ()=>{
+      const day=b.dataset.day, id=b.dataset.id;
+      const task = state.tasks[day].find(t=>t.id===id);
+      openModal('Editar tarefa', 'Texto da tarefa', (val)=>{
+        task.text = val; saveState(); renderWeek();
+      }, task.text);
+    };
+  });
+  document.querySelectorAll('.subtask-btn').forEach(b=>{
+    b.onclick = ()=>{
+      const day=b.dataset.day, id=b.dataset.id;
+      const task = state.tasks[day].find(t=>t.id===id);
+      if(task.subtasks.length>=3){ setMascot(t('toast.subtaskLimit')); return; }
+      openModal('Micro-passo', 'ex: separar os materiais', (txt)=>{
+        task.subtasks.push({text:txt, done:false}); saveState(); renderWeek();
+      });
+    };
+  });
+}
+
+function updateThreePaws(){
+  renderSummary();
+  renderAchievements();
+  const today = todayKeyPT();
+  const todayTasks = state.tasks[today] || [];
+  const anyPriorityDone = todayTasks.some(t=>t.done);
+  document.getElementById('paw-task').classList.toggle('done', anyPriorityDone);
+
+  const waterDone = state.water.goalMl>0 && state.water.currentMl >= state.water.goalMl;
+  document.getElementById('paw-water').classList.toggle('done', waterDone);
+
+  const movedToday = state.exercise.logs.some(l=>l.date===todayISO());
+  const meditatedToday = state.achievements.some(a=>a.type==='meditacao' && a.date===todayISO());
+  document.getElementById('paw-move').classList.toggle('done', movedToday || meditatedToday);
+}
+
+// ---------- Lixeira de ideias ----------
+document.getElementById('ideaQuickAdd').onclick = addIdeaFromInput;
+document.getElementById('ideaQuickInput').onkeydown = (e)=>{
+  if(e.key==='Enter'){ e.preventDefault(); addIdeaFromInput(); }
+};
+function addIdeaFromInput(){
+  const input = document.getElementById('ideaQuickInput');
+  if(input.value.trim()){
+    state.ideas.push({text:input.value.trim(), date:todayISO()});
+    input.value=''; saveState(); renderIdeas();
+    setMascot(t('toast.ideaSaved'));
+    input.focus();
+  }
+}
+document.getElementById('warehouseQuickAdd').onclick = addWarehouseIdeaFromInput;
+document.getElementById('warehouseQuickInput').onkeydown = (e)=>{
+  if(e.key==='Enter'){ e.preventDefault(); addWarehouseIdeaFromInput(); }
+};
+function addWarehouseIdeaFromInput(){
+  const input = document.getElementById('warehouseQuickInput');
+  if(input.value.trim()){
+    state.ideaWarehouse.push({text:input.value.trim(), date:todayISO()});
+    input.value=''; saveState(); renderWarehouseIdeas();
+    setMascot(t('toast.warehouseSaved'));
+    input.focus();
+  }
+}
+function renderIdeas(){
+  const el = document.getElementById('ideaList');
+  el.innerHTML = state.ideas.length ? '' : '<p style="font-size:0.85rem;color:var(--ink-soft)">Nada por aqui ainda 🌱</p>';
+  state.ideas.slice().reverse().forEach((idea, ri)=>{
+    const i = state.ideas.length-1-ri;
+    const div = document.createElement('div');
+    div.className='idea-item';
+    div.innerHTML = `<span>${escapeHtml(idea.text)}</span>
+      <span style="display:flex;gap:2px;">
+        <button class="mini-btn move-to-warehouse-btn" data-i="${i}" aria-label="${t('week.moveToWarehouseLabel')}: ${escapeHtml(idea.text)}">📦</button>
+        <button class="mini-btn" data-i="${i}" aria-label="Excluir ideia: ${escapeHtml(idea.text)}">🗑️</button>
+      </span>`;
+    div.querySelectorAll('button')[0].onclick = ()=>{
+      const [moved] = state.ideas.splice(i,1);
+      state.ideaWarehouse.push(moved);
+      saveState(); renderIdeas(); renderWarehouseIdeas();
+      setMascot(t('toast.movedToWarehouse'));
+    };
+    div.querySelectorAll('button')[1].onclick = ()=>{ state.ideas.splice(i,1); saveState(); renderIdeas(); };
+    el.appendChild(div);
+  });
+}
+function renderWarehouseIdeas(){
+  const el = document.getElementById('warehouseList');
+  if(!el) return;
+  el.innerHTML = state.ideaWarehouse.length ? '' : '<p style="font-size:0.85rem;color:var(--ink-soft)">Nada guardado por aqui ainda 📦</p>';
+  state.ideaWarehouse.slice().reverse().forEach((idea, ri)=>{
+    const i = state.ideaWarehouse.length-1-ri;
+    const div = document.createElement('div');
+    div.className='idea-item';
+    div.innerHTML = `<span>${escapeHtml(idea.text)}</span><button class="mini-btn" data-i="${i}" aria-label="Excluir ideia guardada: ${escapeHtml(idea.text)}">🗑️</button>`;
+    div.querySelector('button').onclick = ()=>{ state.ideaWarehouse.splice(i,1); saveState(); renderWarehouseIdeas(); };
+    el.appendChild(div);
+  });
+}
+function renderAchievements(){
+  const el = document.getElementById('achList');
+  const all = state.achievements.slice().reverse();
+  el.innerHTML = all.length ? '' : '<p style="font-size:0.85rem;color:var(--ink-soft)">Suas conquistas vão aparecer aqui, patinha por patinha 🐾</p>';
+  all.slice(0,40).forEach(a=>{
+    const div = document.createElement('div');
+    div.className='ach-item';
+    const icon = a.type==='tarefa'?'✅':(a.type==='exercicio'?'🏃':(a.type==='meditacao'?'🧘':'⭐'));
+    div.innerHTML = `<span>${icon} ${escapeHtml(a.text)}</span><span style="color:var(--ink-soft);font-size:0.75rem;">${a.date}</span>`;
+    el.appendChild(div);
+  });
+}
+
+// ---------- Movimento / exercício ----------
+function renderExercise(){
+  const el = document.getElementById('exerciseTypes');
+  el.innerHTML='';
+  const loggedToday = state.exercise.logs.find(l=>l.date===todayISO());
+  EX_TYPES.forEach(type=>{
+    const b = document.createElement('button');
+    b.className = 'ex-btn' + (loggedToday && loggedToday.type===type ? ' today' : '');
+    b.textContent = type;
+    b.setAttribute('aria-pressed', String(!!(loggedToday && loggedToday.type===type)));
+    b.onclick = ()=>{
+      state.exercise.logs = state.exercise.logs.filter(l=>l.date!==todayISO());
+      state.exercise.logs.push({date:todayISO(), type});
+      state.achievements.push({type:'exercicio', text:type, date:todayISO()});
+      celebrate(['💪','🏅','🌸','🐾']);
+      setMascot(t('toast.exerciseLogged'), mascotEmoji());
+      saveState(); renderExercise(); updateThreePaws();
+    };
+    el.appendChild(b);
+  });
+  const row = document.getElementById('streakRow');
+  row.innerHTML='';
+  const monday = startOfCurrentWeek();
+  let count=0;
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(d.getDate()+i);
+    const iso = toLocalISODate(d);
+    const on = state.exercise.logs.some(l=>l.date===iso);
+    if(on) count++;
+    const span = document.createElement('span');
+    span.className = 'p'+(on?' on':'');
+    span.innerHTML = pawIconSVG();
+    span.setAttribute('aria-hidden','true');
+    row.appendChild(span);
+  }
+  row.setAttribute('aria-label', `${count} de 7 dias com movimento nesta semana`);
+}
+
+// ---------- Água e peso ----------
+function checkNewDay(){
+  if(state.water.date !== todayISO()){
+    // Guarda o total do dia que está terminando no histórico, para o gráfico de água
+    if(state.water.date && state.water.currentMl>0){
+      const idx = state.waterHistory.findIndex(w=>w.date===state.water.date);
+      if(idx>=0) state.waterHistory[idx].ml = state.water.currentMl;
+      else state.waterHistory.push({date: state.water.date, ml: state.water.currentMl});
+    }
+    state.water.date = todayISO();
+    state.water.currentMl = 0;
+  }
+}
+function renderWater(){
+  checkNewDay();
+  document.getElementById('inPeso').value = state.profile.peso || '';
+  document.getElementById('inAltura').value = state.profile.altura || '';
+  document.getElementById('inIdade').value = state.profile.idade || '';
+  const goal = state.water.goalMl;
+  const cur = state.water.currentMl;
+  document.getElementById('waterGoalText').textContent = goal>0
+    ? `Meta de hoje: ${cur}ml / ${goal}ml 💧`
+    : 'Defina seus dados para calcular a meta 🌸';
+  const pct = goal>0 ? Math.min(100, Math.round(cur/goal*100)) : 0;
+  document.getElementById('bottleFill').style.height = pct+'%';
+  document.getElementById('waterProgressBar').style.width = pct+'%';
+  renderWaterChart();
+  renderWeightSection();
+}
+document.getElementById('calcBtn').onclick = ()=>{
+  const peso = parseFloat(document.getElementById('inPeso').value);
+  const altura = parseFloat(document.getElementById('inAltura').value);
+  const idade = parseInt(document.getElementById('inIdade').value);
+  if(!peso){ setMascot(t('toast.needWeight')); return; }
+  state.profile = {peso, altura, idade};
+  let goal = peso*35;
+  if(idade && idade>55) goal *= 0.9;
+  goal *= cycleWaterAdjustment();
+  goal = Math.round(goal/50)*50;
+  state.water.goalMl = goal;
+  saveState(); renderWater();
+  setMascot(t('toast.waterGoalCalculated'));
+};
+document.getElementById('add250').onclick = ()=>{ addWater(250); };
+document.getElementById('add500').onclick = ()=>{ addWater(500); };
+function addWater(ml){
+  checkNewDay();
+  state.water.currentMl += ml;
+  const idx = state.waterHistory.findIndex(w=>w.date===state.water.date);
+  if(idx>=0) state.waterHistory[idx].ml = state.water.currentMl;
+  else state.waterHistory.push({date: state.water.date, ml: state.water.currentMl});
+  const reachedGoal = state.water.goalMl>0 && state.water.currentMl>=state.water.goalMl && (state.water.currentMl-ml)<state.water.goalMl;
+  if(reachedGoal){ celebrate(['💧','🌊','⭐']); setMascot(t('toast.waterGoalReached')); }
+  saveState(); renderWater(); updateThreePaws();
+}
+document.getElementById('snackReminderBtn').onclick = ()=>{
+  setMascot(t('toast.snackReminder'), mascotEmoji());
+};
+document.getElementById('logWeightBtn').onclick = ()=>{
+  openModal('Peso de hoje (kg)', 'ex: 68.5', (val)=>{
+    const n = parseFloat(val.replace(',','.'));
+    if(!n || n<=0){ setMascot(t('toast.invalidWeight')); return; }
+    const existingIdx = state.weightHistory.findIndex(w=>w.date===todayISO());
+    if(existingIdx>=0) state.weightHistory[existingIdx].peso = n;
+    else state.weightHistory.push({date:todayISO(), peso:n});
+    state.profile.peso = n;
+    saveState(); renderWeightSection();
+    setMascot(t('toast.weightThanks'));
+  });
+};
+// =================== Gráficos (SVG leve, sem dependências externas) ===================
+function svgLineChart(points, opts){
+  opts = opts || {};
+  const width = opts.width||300, height = opts.height||120, color = opts.color||'var(--accent2)', unit = opts.unit||'';
+  if(!points || points.length<2) return null;
+  const values = points.map(p=>p.value);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max-min) || 1;
+  const padX=10, padY=14;
+  const stepX = (width-2*padX) / (points.length-1);
+  const coords = points.map((p,i)=>({
+    x: padX + i*stepX,
+    y: height-padY - ((p.value-min)/range)*(height-2*padY),
+    label:p.label, value:p.value
+  }));
+  const polyPoints = coords.map(c=>`${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const dots = coords.map(c=>`<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.5" fill="${color}"><title>${escapeHtml(c.label)}: ${c.value}${unit}</title></circle>`).join('');
+  return `<svg viewBox="0 0 ${width} ${height}" class="chart-svg" role="img" aria-label="Gráfico de evolução">
+    <polyline points="${polyPoints}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+  </svg>`;
+}
+function svgBarChart(points, opts){
+  opts = opts || {};
+  const width = opts.width||300, height = opts.height||120, color = opts.color||'var(--accent2)', unit = opts.unit||'';
+  if(!points || !points.length) return null;
+  const max = Math.max(...points.map(p=>p.value), 1);
+  const padX=6, padY=14, gap=4;
+  const barW = (width-2*padX-gap*(points.length-1)) / points.length;
+  const bars = points.map((p,i)=>{
+    const h = Math.max(2, (p.value/max) * (height-2*padY));
+    const x = padX + i*(barW+gap);
+    const y = height-padY-h;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(barW,2).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${color}"><title>${escapeHtml(p.label)}: ${p.value}${unit}</title></rect>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${width} ${height}" class="chart-svg" role="img" aria-label="Gráfico de barras">${bars}</svg>`;
+}
+function renderWaterChart(){
+  const el = document.getElementById('waterChartContainer');
+  if(!el) return;
+  const history = (state.waterHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const points = history.slice(-29).map(w=>({label:w.date, value:w.ml}));
+  if(state.water.currentMl>0 && !points.some(p=>p.label===state.water.date)){
+    points.push({label:state.water.date, value:state.water.currentMl});
+  }
+  const svg = points.length>=2 ? svgBarChart(points.slice(-30), {color:'var(--cyan-3)', unit:'ml'}) : null;
+  el.innerHTML = svg || `<p class="chart-empty">${t('charts.notEnoughData')}</p>`;
+}
+function renderWeightChart(){
+  const el = document.getElementById('weightChartContainer');
+  if(!el) return;
+  const points = (state.weightHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(w=>({label:w.date, value:w.peso}));
+  const svg = points.length>=2 ? svgLineChart(points, {color:'var(--accent)', unit:'kg'}) : null;
+  el.innerHTML = svg || `<p class="chart-empty">${t('charts.notEnoughWeight')}</p>`;
+}
+function renderCycleChart(){
+  const card = document.getElementById('cycleChartCard');
+  const el = document.getElementById('cycleChartContainer');
+  if(!el || !card) return;
+  const hist = (state.cycle.periodHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(hist.length<2){ card.style.display='none'; return; }
+  card.style.display='block';
+  const points = [];
+  for(let i=1;i<hist.length;i++){
+    const d1 = new Date(hist[i-1].date+'T00:00:00');
+    const d2 = new Date(hist[i].date+'T00:00:00');
+    const days = Math.round((d2-d1)/86400000);
+    points.push({label: hist[i].date, value: days});
+  }
+  const svg = svgBarChart(points, {color:'var(--fox)', unit:' dias'});
+  el.innerHTML = svg || `<p class="chart-empty">${t('charts.notEnoughCycle')}</p>`;
+}
+// =================== Fim Gráficos ===================
+
+function renderWeightSection(){
+  const list = document.getElementById('weightList');
+  list.innerHTML='';
+  state.weightHistory.slice().reverse().forEach(w=>{
+    const div = document.createElement('div');
+    div.className='weight-row';
+    div.innerHTML = `<span>${w.date}</span><span>${w.peso} kg</span>`;
+    list.appendChild(div);
+  });
+  renderWeightChart();
+  const bmiEl = document.getElementById('bmiResult');
+  const {peso, altura} = state.profile;
+  if(peso && altura){
+    const bmi = peso/Math.pow(altura/100,2);
+    let msg;
+    if(bmi<18.5) msg = 'Seu corpo pode estar pedindo mais energia e nutrientes 🌱';
+    else if(bmi<25) msg = 'Você está numa faixa de energia bem equilibrada 🌸';
+    else if(bmi<30) msg = 'Seu corpo está carregando uma reservinha extra de energia 🌻';
+    else msg = 'Vamos cuidar da sua energia com bastante carinho, um passo de cada vez 🦊';
+    bmiEl.innerHTML = `<strong>Índice: ${bmi.toFixed(1)}</strong><br><span style="color:var(--ink-soft)">${msg}</span>`;
+  } else {
+    bmiEl.textContent='';
+  }
+}
+
+// ---------- Cantinho da calma ----------
+let selectedMin = 3;
+document.querySelectorAll('.timer-pick button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.timer-pick button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    selectedMin = +b.dataset.min;
+  };
+});
+let calmInterval=null, calmPhaseTimeout=null, calmSecondsLeft=0;
+document.getElementById('calmStartBtn').onclick = ()=>{
+  calmSecondsLeft = selectedMin*60;
+  document.getElementById('calmStartBtn').style.display='none';
+  document.getElementById('calmStopBtn').style.display='inline-block';
+  const guideMsgs = [
+    `Inspire bem devagarinho ${mascotEmoji()}`,
+    'Segure e sinta a calma chegar',
+    'Solte o que não precisa agora'
+  ];
+  runBreathCycle(guideMsgs);
+  calmInterval = setInterval(()=>{
+    calmSecondsLeft--;
+    if(calmSecondsLeft<=0){ finishCalm(); }
+  },1000);
+};
+function runBreathCycle(msgs){
+  const circle = document.getElementById('breathCircle');
+  const msgEl = document.getElementById('calmMsg');
+  function cycle(){
+    if(calmSecondsLeft<=0) return;
+    circle.className='breath-circle in'; circle.textContent='Inspire'; msgEl.textContent=msgs[0];
+    calmPhaseTimeout = setTimeout(()=>{
+      if(calmSecondsLeft<=0) return;
+      circle.className='breath-circle hold'; circle.textContent='Segure'; msgEl.textContent=msgs[1];
+      calmPhaseTimeout = setTimeout(()=>{
+        if(calmSecondsLeft<=0) return;
+        circle.className='breath-circle out'; circle.textContent='Solte'; msgEl.textContent=msgs[2];
+        calmPhaseTimeout = setTimeout(cycle, 4000);
+      },4000);
+    },4000);
+  }
+  cycle();
+}
+document.getElementById('calmStopBtn').onclick = ()=>{ finishCalm(true); };
+function finishCalm(cancelled){
+  clearInterval(calmInterval); clearTimeout(calmPhaseTimeout);
+  document.getElementById('calmStartBtn').style.display='inline-block';
+  document.getElementById('calmStopBtn').style.display='none';
+  document.getElementById('breathCircle').className='breath-circle';
+  document.getElementById('breathCircle').textContent='Inspire';
+  if(!cancelled){
+    document.getElementById('calmMsg').textContent='Sessão concluída, muito bem 🌸';
+    celebrate(['⭐','🌙','✨']);
+    state.achievements.push({type:'meditacao', text:selectedMin+' min de respiração', date:todayISO()});
+    saveState(); updateThreePaws();
+  } else {
+    document.getElementById('calmMsg').textContent='Sem problemas, volte quando quiser 💜';
+  }
+}
+
+// ---------- Ferramentas anti-procrastinação ----------
+document.getElementById('helpChooseBtn').onclick = ()=>{
+  const today = todayKeyPT();
+  let pending = state.tasks[today].filter(t=>!t.done);
+  let fromDayName = null;
+  if(!pending.length){
+    for(const d of DAYS){
+      const dayPending = state.tasks[d.key].filter(t=>!t.done);
+      if(dayPending.length){ pending = dayPending; fromDayName = d.name; break; }
+    }
+  }
+  if(!pending.length){ setMascot(t('toast.noTasksWeekHelp'), mascotEmoji()); return; }
+  const chosen = pending[Math.floor(Math.random()*pending.length)];
+  const suffix = fromDayName ? ` (marcada para ${fromDayName})` : '';
+  setMascot(tf('toast.chooseTask', {task: chosen.text, suffix}), mascotEmoji());
+};
+
+// Timer do Micro-Foco resistente a troca de aba: usa o horário-alvo (Date.now() + duração)
+// em vez de decrementar um contador a cada tick, então não perde precisão se a aba
+// for minimizada ou o navegador jogar o setInterval para segundo plano.
+let mfTimerInterval=null, mfDeadline=null, mfSourceDay=null;
+document.getElementById('microFocusBtn').onclick = ()=>{
+  const today = todayKeyPT();
+  let pending = state.tasks[today].filter(t=>!t.done);
+  let sourceDay = today;
+  let fromDayName = null;
+  if(!pending.length){
+    for(const d of DAYS){
+      const dayPending = state.tasks[d.key].filter(t=>!t.done);
+      if(dayPending.length){ pending = dayPending; sourceDay = d.key; fromDayName = d.name; break; }
+    }
+  }
+  if(!pending.length){ setMascot(t('toast.noTasksWeekFocus'), mascotEmoji()); return; }
+  const chosen = pending[0];
+  state.lastMicroTaskId = chosen.id;
+  mfSourceDay = sourceDay;
+  document.getElementById('mfTaskText').textContent = chosen.text + (fromDayName ? ` (${fromDayName})` : '');
+  document.getElementById('microFocusOverlay').classList.add('show');
+  mfDeadline = Date.now() + 15*60*1000;
+  tickMfTimer();
+  clearInterval(mfTimerInterval);
+  mfTimerInterval = setInterval(tickMfTimer, 250);
+};
+function tickMfTimer(){
+  const remaining = Math.max(0, Math.round((mfDeadline - Date.now())/1000));
+  updateMfTimer(remaining);
+  if(remaining<=0){
+    clearInterval(mfTimerInterval);
+    setMascot(t('toast.timeUp'), mascotEmoji());
+  }
+}
+function updateMfTimer(s){
+  const m = Math.floor(s/60), sec = s%60;
+  document.getElementById('mfTimer').textContent = `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+document.getElementById('mfDoneBtn').onclick = ()=>{
+  const day = mfSourceDay || todayKeyPT();
+  const task = state.tasks[day].find(t=>t.id===state.lastMicroTaskId);
+  if(task){
+    task.done=true;
+    const already = state.achievements.some(a=>a.type==='tarefa' && a.taskId===task.id && a.date===todayISO());
+    if(!already) state.achievements.push({type:'tarefa', text:task.text, date:todayISO(), taskId:task.id});
+  }
+  clearInterval(mfTimerInterval);
+  document.getElementById('microFocusOverlay').classList.remove('show');
+  celebrate(['✨','🌸','💜','⭐','🐾'], true); setMascot(t('toast.taskDoneCelebrate'), mascotEmoji());
+  saveState(); render();
+};
+document.getElementById('mfCancelBtn').onclick = ()=>{
+  clearInterval(mfTimerInterval);
+  document.getElementById('microFocusOverlay').classList.remove('show');
+};
+
+// ---------- Resumo da semana ----------
+function renderSummary(){
+  const monday = startOfCurrentWeek();
+  const isThisWeek = (iso)=> new Date(iso+'T00:00:00') >= monday;
+  const tasksDone = state.achievements.filter(a=>a.type==='tarefa' && isThisWeek(a.date)).length;
+  const exercises = state.exercise.logs.filter(l=>isThisWeek(l.date)).length;
+  const meditations = state.achievements.filter(a=>a.type==='meditacao' && isThisWeek(a.date)).length;
+  const el = document.getElementById('summaryContent');
+  el.innerHTML = `
+    <div class="summary-grid">
+      <div class="stat-box"><span class="num">${tasksDone}</span><span class="lbl">tarefas concluídas</span></div>
+      <div class="stat-box"><span class="num">${exercises}</span><span class="lbl">dias em movimento</span></div>
+      <div class="stat-box"><span class="num">${meditations}</span><span class="lbl">pausas de calma</span></div>
+    </div>
+    <div class="summary-msg">${tasksDone+exercises+meditations===0 ? 'A semana está começando — cada patinha vai contar aqui 🐾' : 'Cada número aqui é uma vitória sua nesta semana 💜'}</div>
+  `;
+}
+
+// ---------- Backup ----------
+document.getElementById('backupExportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'foco-patinhas-backup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  setMascot(t('toast.backupExported'));
+};
+document.getElementById('backupImportBtn').onclick = ()=>{
+  document.getElementById('backupFileInput').click();
+};
+document.getElementById('backupFileInput').onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      state = Object.assign(defaultState(), imported);
+      saveState(); render();
+      setMascot(t('toast.backupRestored'));
+    }catch(err){
+      setMascot(t('toast.backupBadFile'));
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+};
+
+// ---------- Alternar visão / Limpeza sem culpa ----------
+document.getElementById('viewToggleBtn').onclick = ()=>{
+  state.viewMode = state.viewMode==='hoje' ? 'semana' : 'hoje';
+  syncViewToggleButton();
+  saveState(); renderWeek();
+};
+function syncViewToggleButton(){
+  const btn = document.getElementById('viewToggleBtn');
+  const isHoje = state.viewMode==='hoje';
+  btn.textContent = isHoje ? ('🗓️ '+t('week.viewSemana')) : ('👀 '+t('week.viewHoje'));
+  btn.setAttribute('aria-pressed', String(isHoje));
+}
+document.getElementById('archiveBtn').onclick = ()=>{
+  let removed = 0;
+  DAYS.forEach(d=>{
+    const before = state.tasks[d.key].length;
+    state.tasks[d.key] = state.tasks[d.key].filter(t=>!t.done);
+    removed += before - state.tasks[d.key].length;
+  });
+  if(removed===0){ setMascot(t('toast.nothingToArchive')); return; }
+  saveState(); renderWeek();
+  setMascot(tf('toast.archived', {count: removed}));
+};
+
+// ---------- Exportar .ics (com segunda-feira calculada corretamente) ----------
+function icsEscape(s){ return String(s).replace(/([,;])/g,'\\$1'); }
+document.getElementById('icsExportBtn').onclick = ()=>{
+  const pending = [];
+  DAYS.forEach((d, idx)=>{
+    state.tasks[d.key].filter(t=>!t.done).forEach(t=>pending.push({...t, dayIdx:idx}));
+  });
+  if(!pending.length){ setMascot(t('toast.noTasksToExport')); return; }
+  const monday = startOfCurrentWeek(); // já normalizada com setHours(0,0,0,0)
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Mascote Assistente//PT-BR\r\n';
+  pending.forEach(t=>{
+    const date = new Date(monday); date.setDate(monday.getDate()+t.dayIdx);
+    const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), da = String(date.getDate()).padStart(2,'0');
+    const dtStart = `${y}${m}${da}T090000`;
+    const dtEnd = `${y}${m}${da}T093000`;
+    ics += `BEGIN:VEVENT\r\nUID:${t.id}@foco-patinhas\r\nDTSTART:${dtStart}\r\nDTEND:${dtEnd}\r\nSUMMARY:${icsEscape(t.text)}\r\nDESCRIPTION:${icsEscape('Categoria: '+t.tag)}\r\nEND:VEVENT\r\n`;
+  });
+  ics += 'END:VCALENDAR\r\n';
+  const blob = new Blob([ics], {type:'text/calendar'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'foco-patinhas-semana.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  setMascot(t('toast.icsExported'));
+};
+
+// ---------- Ações do cabeçalho ----------
+document.getElementById('themeBtn').onclick = toggleTheme;
+document.getElementById('soundBtn').onclick = ()=>{
+  if(state.ambientSound){
+    stopAmbientSound(); state.ambientSound=false;
+    setAmbientButtonsState(null);
+  } else {
+    playAmbientSound(state.ambientType || 'suave');
+    state.ambientSound=true;
+    setAmbientButtonsState(state.ambientType || 'suave');
+  }
+  document.getElementById('soundBtn').textContent = state.ambientSound ? '🔊' : '🔇';
+  document.getElementById('soundBtn').setAttribute('aria-pressed', String(state.ambientSound));
+  saveState();
+};
+document.getElementById('notifBtn').onclick = requestNotif;
+
+// ---------- Renderizar tudo ----------
+function render(){
+  applyCustomColors();
+  applyTheme();
+  applyMascotUI();
+  updateCycleTabVisibility();
+  applyGenderStyle();
+  renderSettingsPanel();
+  applyLocale();
+  fillCycleInputs();
+  renderCyclePhase();
+  syncViewToggleButton();
+  syncNotifButton();
+  if(state.settings.notifEnabled && 'Notification' in window && Notification.permission==='granted'){
+    startReminders();
+  } else if(state.settings.notifEnabled){
+    // Permissão foi revogada nas configurações do navegador desde a última vez: desliga por aqui também
+    state.settings.notifEnabled = false;
+  }
+  renderWeek();
+  renderExercise();
+  renderWater();
+  renderIdeas();
+  renderWarehouseIdeas();
+  updateThreePaws();
+  randomMascot();
+}
+
+// =================== Integração com Google (Agenda + Drive) ===================
+// Usa o Google Identity Services (OAuth2 do lado do navegador, sem servidor nosso).
+// O "Client ID" não é uma senha — é uma identificação pública do app, por isso é
+// seguro guardá-lo no localStorage.
+let googleTokenClient = null;
+let googleAccessToken = null;
+let googleTokenExpiresAt = 0;
+
+function googleScopes(){
+  return 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
+}
+function setGoogleMsg(msg){ const el = document.getElementById('googleSyncMsg'); if(el) el.textContent = msg || ''; }
+
+function renderGoogleUI(){
+  const setupBlock = document.getElementById('googleSetupBlock');
+  const signInBlock = document.getElementById('googleSignInBlock');
+  const connectedBlock = document.getElementById('googleConnectedBlock');
+  if(!setupBlock) return;
+  const clientIdInput = document.getElementById('googleClientIdInput');
+  if(clientIdInput && document.activeElement!==clientIdInput) clientIdInput.value = state.settings.googleClientId || '';
+
+  const hasId = !!(state.settings.googleClientId && state.settings.googleClientId.trim());
+  const isConnected = !!googleAccessToken;
+
+  setupBlock.style.display = hasId ? 'none' : 'block';
+  signInBlock.style.display = (hasId && !isConnected) ? 'block' : 'none';
+  connectedBlock.style.display = isConnected ? 'block' : 'none';
+
+  if(isConnected){
+    document.getElementById('googleStatusText').textContent = state.googleUserEmail
+      ? `✅ ${t('config.googleConnectedAs')} ${state.googleUserEmail}`
+      : `✅ ${t('config.googleConnectedGeneric')}`;
+    document.getElementById('googleAutoCalendarToggle').checked = !!state.settings.googleAutoCalendar;
+  }
+}
+
+function initGoogleClient(){
+  if(!window.google || !google.accounts || !google.accounts.oauth2) return false;
+  const clientId = (state.settings.googleClientId || '').trim();
+  if(!clientId) return false;
+  try{
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: googleScopes(),
+      callback: (resp)=>{
+        if(resp && resp.access_token){
+          googleAccessToken = resp.access_token;
+          googleTokenExpiresAt = Date.now() + (resp.expires_in||3600)*1000 - 60000;
+          fetchGoogleUserEmail().finally(renderGoogleUI);
+        }
+      },
+      error_callback: ()=>{ setGoogleMsg(t('config.googleError')); }
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+async function fetchGoogleUserEmail(){
+  if(!googleAccessToken) return;
+  try{
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers:{ Authorization:'Bearer '+googleAccessToken } });
+    if(res.ok){ const data = await res.json(); state.googleUserEmail = data.email || ''; saveState(); }
+  }catch(e){}
+}
+
+function googleConnect(){
+  if(!initGoogleClient()){ setGoogleMsg(t('config.googleLibNotReady')); return; }
+  googleTokenClient.requestAccessToken({ prompt:'consent' });
+}
+
+function googleDisconnect(){
+  if(googleAccessToken && window.google && google.accounts && google.accounts.oauth2){
+    try{ google.accounts.oauth2.revoke(googleAccessToken, ()=>{}); }catch(e){}
+  }
+  googleAccessToken = null; googleTokenExpiresAt = 0;
+  state.googleUserEmail = ''; saveState(); renderGoogleUI();
+  setGoogleMsg(t('config.googleDisconnected'));
+}
+
+// Garante um token válido antes de qualquer chamada às APIs do Google
+function ensureGoogleToken(){
+  if(googleAccessToken && Date.now() < googleTokenExpiresAt) return Promise.resolve(true);
+  if(!initGoogleClient()) return Promise.resolve(false);
+  return new Promise((resolve)=>{
+    googleTokenClient.callback = (resp)=>{
+      if(resp && resp.access_token){
+        googleAccessToken = resp.access_token;
+        googleTokenExpiresAt = Date.now() + (resp.expires_in||3600)*1000 - 60000;
+        resolve(true);
+      } else resolve(false);
+    };
+    googleTokenClient.requestAccessToken({ prompt:'' });
+  });
+}
+
+// ---------- Google Drive: guarda uma cópia dos dados do app na pasta privada do próprio app ----------
+async function syncToGoogleDrive(){
+  const ok = await ensureGoogleToken();
+  if(!ok){ setGoogleMsg(t('config.googleError')); return false; }
+  try{
+    const payload = JSON.stringify(state);
+    const fileId = state.settings.googleDriveFileId;
+    let res;
+    if(fileId){
+      res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        method:'PATCH', headers:{ Authorization:'Bearer '+googleAccessToken, 'Content-Type':'application/json' }, body: payload
+      });
+    } else {
+      const boundary = 'foco_patinhas_boundary';
+      const metadata = { name:'foco-patinhas-dados.json', parents:['appDataFolder'] };
+      const body = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`
+        + `--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${boundary}--`;
+      res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method:'POST', headers:{ Authorization:'Bearer '+googleAccessToken, 'Content-Type':`multipart/related; boundary=${boundary}` }, body
+      });
+    }
+    if(res.ok){
+      const data = await res.json();
+      if(data.id) state.settings.googleDriveFileId = data.id;
+      saveState();
+      return true;
+    }
+    return false;
+  }catch(e){ return false; }
+}
+
+// ---------- Google Agenda: cria um evento pra cada tarefa pendente ainda não enviada ----------
+function nextDateForDay(dayKey){
+  const idx = DAYS.findIndex(d=>d.key===dayKey);
+  const today = new Date();
+  const todayIdx = (today.getDay()+6)%7; // segunda=0
+  const target = new Date(today);
+  target.setDate(today.getDate() + (idx - todayIdx));
+  const y = target.getFullYear(), m = String(target.getMonth()+1).padStart(2,'0'), d = String(target.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+async function syncOneTaskToGoogleCalendar(task, dayKey){
+  if(!googleAccessToken || task.done || task.googleEventId) return;
+  try{
+    const dateISO = nextDateForDay(dayKey);
+    const event = { summary: task.text, description:'Criado pelo Mascote Assistente 🐾', start:{ date: dateISO }, end:{ date: dateISO } };
+    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method:'POST', headers:{ Authorization:'Bearer '+googleAccessToken, 'Content-Type':'application/json' }, body: JSON.stringify(event)
+    });
+    if(res.ok){ const data = await res.json(); task.googleEventId = data.id; saveState(); }
+  }catch(e){}
+}
+async function syncAllTasksToGoogleCalendar(){
+  const ok = await ensureGoogleToken();
+  if(!ok) return 0;
+  let count = 0;
+  for(const day of DAYS){
+    for(const task of (state.tasks[day.key]||[])){
+      if(task.done || task.googleEventId) continue;
+      await syncOneTaskToGoogleCalendar(task, day.key);
+      if(task.googleEventId) count++;
+    }
+  }
+  return count;
+}
+
+document.getElementById('googleSaveIdBtn').onclick = ()=>{
+  const val = document.getElementById('googleClientIdInput').value.trim();
+  state.settings.googleClientId = val;
+  saveState();
+  setGoogleMsg(val ? t('config.googleIdSaved') : '');
+  renderGoogleUI();
+};
+document.getElementById('googleConnectBtn').onclick = googleConnect;
+document.getElementById('googleDisconnectBtn').onclick = googleDisconnect;
+document.getElementById('googleSyncBtn').onclick = async ()=>{
+  setGoogleMsg(t('config.googleSyncing'));
+  const driveOk = await syncToGoogleDrive();
+  const count = await syncAllTasksToGoogleCalendar();
+  setGoogleMsg(driveOk ? tf('config.googleSyncSuccess', {count}) : t('config.googleError'));
+};
+document.getElementById('googleAutoCalendarToggle').onchange = (e)=>{
+  state.settings.googleAutoCalendar = e.target.checked;
+  saveState();
+};
+
+document.addEventListener('DOMContentLoaded', loadState);
+</script>
+</body>
+</html>
